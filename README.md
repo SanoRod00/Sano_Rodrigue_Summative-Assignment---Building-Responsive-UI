@@ -3,8 +3,11 @@
 ## 1. Project Identity
 
 **Project Name:** BudgetBuddy
+
 **Theme:** Student Finance Tracker
+
 **Target Audience:** African Leadership University (ALU) Students
+
 
 **Purpose:**
 BudgetBuddy is a specialized web application designed to assist ALU students in managing their personal finances. Recognizing the unique challenges of student life, this tool provides a robust platform for tracking expenses, analyzing spending habits, and adhering to monthly budget constraints. The application aims to foster financial literacy and discipline through an intuitive, accessible, and data-driven interface.
