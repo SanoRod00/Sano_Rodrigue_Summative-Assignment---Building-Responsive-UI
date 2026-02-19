@@ -1,0 +1,474 @@
+/* =========================================
+   1. CSS Variables & Theme Setup
+   ========================================= */
+:root {
+    /* Color Palette - Extracted/Approximated from Image */
+    /* Primary Dark Blue (Header/Hero) */
+    --color-primary-dark: #101828;
+    --color-primary-light: #1d2939;
+    /* For gradients/hover */
+
+    /* Brand Red (Buttons/Accents) */
+    --color-brand-red: #b91c1c;
+    --color-brand-red-hover: #991b1b;
+
+    /* Text Colors */
+    --color-text-heading: #101828;
+    --color-text-body: #475467;
+    --color-text-nav: #e4e7ec;
+    --color-text-white: #ffffff;
+
+    /* Backgrounds */
+    --color-bg-page: #f9fafb;
+    /* Light grey/blue tint */
+    --color-bg-card: #ffffff;
+    --color-bg-input: #ffffff;
+
+    /* Borders */
+    --color-border: #eaecf0;
+
+    /* Typography */
+    --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
+    /* Spacing System (4px base) */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+
+    /* Radius */
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-full: 9999px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
+    --shadow-md: 0 4px 6px -2px rgba(16, 24, 40, 0.03), 0 12px 16px -4px rgba(16, 24, 40, 0.08);
+}
+
+/* =========================================
+   2. Reset & Base Styles
+   ========================================= */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-family);
+    color: var(--color-text-body);
+    background-color: var(--color-bg-page);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--color-text-heading);
+    font-weight: 700;
+    /* Semi-bold to Bold */
+    line-height: 1.25;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+}
+
+button {
+    cursor: pointer;
+    font-family: inherit;
+    border: none;
+    background: none;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* =========================================
+   3. Layout Utilities
+   ========================================= */
+.container {
+    width: 100%;
+    max-width: 1280px;
+    /* Wider container for desktop */
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+}
+
+@media (min-width: 768px) {
+    .container {
+        padding: 0 var(--space-8);
+    }
+}
+
+/* Utility Flex */
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================================
+   4. Header Component
+   ========================================= */
+.site-header {
+    background-color: var(--color-primary-dark);
+    color: var(--color-text-white);
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.logo-icon {
+    /* Simple house icon using CSS shapes or unicode? Let's use an img or svg in HTML */
+    height: 24px;
+    width: auto;
+}
+
+.nav-links {
+    display: none;
+    /* Hidden on mobile */
+}
+
+@media (min-width: 1024px) {
+    .nav-links {
+        display: flex;
+        align-items: center;
+        gap: var(--space-8);
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--color-text-nav);
+    }
+
+    .nav-links a:hover {
+        color: var(--color-text-white);
+    }
+}
+
+.header-actions {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+}
+
+.btn-sm-light {
+    display: none;
+    /* Hide GitHub button on mobile header to save space */
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-white);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.btn-sm-light:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+@media (min-width: 1024px) {
+    .btn-sm-light {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+}
+
+.btn-primary {
+    background-color: var(--color-brand-red);
+    color: var(--color-text-white);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-brand-red-hover);
+    transform: translateY(-1px);
+}
+
+/* Mobile Menu Toggle */
+.mobile-toggle {
+    display: block;
+    margin-left: var(--space-3);
+    color: var(--color-text-white);
+    font-size: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+    .mobile-toggle {
+        display: none;
+    }
+}
+
+/* Mobile Nav Drawer */
+.mobile-nav {
+    position: fixed;
+    top: 64px;
+    /* Adjust based on header height */
+    left: 0;
+    right: 0;
+    background: var(--color-primary-dark);
+    padding: var(--space-4);
+    display: none;
+    flex-direction: column;
+    gap: var(--space-4);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 999;
+}
+
+.mobile-nav.active {
+    display: flex;
+}
+
+.mobile-nav a {
+    color: var(--color-text-nav);
+    font-weight: 500;
+    padding: var(--space-2) 0;
+}
+
+/* =========================================
+   5. Hero Section
+   ========================================= */
+.hero-section {
+    background: linear-gradient(to bottom, var(--color-primary-dark) 0%, #1c2b45 100%);
+    color: var(--color-text-white);
+    text-align: center;
+    padding: var(--space-16) 0 var(--space-12) 0;
+}
+
+.hero-title {
+    font-size: 2.25rem;
+    /* Mobile */
+    font-weight: 800;
+    margin-bottom: var(--space-4);
+    letter-spacing: -0.02em;
+}
+
+.hero-subtitle {
+    color: #94a3b8;
+    /* Slate 400 */
+    font-size: 1.125rem;
+    max-width: 650px;
+    margin: 0 auto var(--space-8) auto;
+    line-height: 1.6;
+}
+
+.hero-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background-color: var(--color-brand-red);
+    color: var(--color-text-white);
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: var(--shadow-md);
+}
+
+.hero-btn:hover {
+    background-color: var(--color-brand-red-hover);
+}
+
+@media (min-width: 768px) {
+    .hero-title {
+        font-size: 3rem;
+    }
+
+    .hero-section {
+        padding: var(--space-16) 0 var(--space-16) 0;
+    }
+}
+
+@media (min-width: 1200px) {
+    .hero-title {
+        font-size: 3.75rem;
+    }
+}
+
+/* =========================================
+   6. Main Content Area (Grid)
+   ========================================= */
+.content-wrapper {
+    background-color: var(--color-bg-page);
+    padding: var(--space-12) 0;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+}
+
+/* Tablet: Side by side info, Contact below */
+@media (min-width: 768px) {
+    .info-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .contact-card-container {
+        grid-column: span 2;
+    }
+}
+
+/* Desktop: 3 Columns row */
+@media (min-width: 1024px) {
+    .info-grid {
+        grid-template-columns: 1.2fr 1fr 320px;
+        /* Custom Proportions */
+        gap: var(--space-10);
+        align-items: start;
+    }
+
+    .contact-card-container {
+        grid-column: span 1;
+    }
+}
+
+/* Typography for Content */
+.section-heading-sm {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-4);
+    color: var(--color-primary-dark);
+}
+
+.text-paragraph {
+    margin-bottom: var(--space-4);
+    color: var(--color-text-body);
+}
+
+/* Check List */
+.check-list {
+    list-style: none;
+    margin-top: var(--space-4);
+}
+
+.check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+    font-weight: 500;
+    color: var(--color-text-heading);
+}
+
+.check-icon {
+    color: var(--color-primary-dark);
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+/* Contact Card */
+.contact-card {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-md);
+}
+
+.card-title {
+    font-size: 1.25rem;
+    margin-bottom: var(--space-4);
+}
+
+.profile-area {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.profile-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--color-bg-page);
+}
+
+.profile-info h4 {
+    font-size: 1rem;
+    margin-bottom: 2px;
+}
+
+.profile-info span {
+    font-size: 0.875rem;
+    color: var(--color-text-body);
+}
+
+.card-desc {
+    font-size: 0.9rem;
+    color: var(--color-text-body);
+    margin-bottom: var(--space-6);
+    line-height: 1.6;
+}
+
+.card-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background: var(--color-bg-page);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-2);
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text-heading);
+}
+
+.card-link:hover {
+    background: #f2f4f7;
+}
+
+/* =========================================
+   7. Helpers
+   ========================================= */
+.icon-svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
