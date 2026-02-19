@@ -1,38 +1,621 @@
+(function () {
+    document.addEventListener("DOMContentLoaded", function () {
+        var APP = window.BudgetBuddy || {};
+        var State = APP.State;
+        var Storage = APP.Storage;
+        var Validators = APP.Validators;
+        var Search = APP.Search;
+        var UI = APP.UI;
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Mobile Navigation Toggle Logic
-    const navToggle = document.getElementById('navToggle');
-    const navMenu = document.getElementById('navMenu');
+        if (!State || !Storage || !Validators || !Search || !UI) {
+            return;
+        }
 
-    if (navToggle && navMenu) {
-        navToggle.addEventListener('click', () => {
-            // Toggle the 'active' class to show/hide the menu
-            navMenu.classList.toggle('active');
-            
-            // Update aria-expanded for accessibility
-            const isExpanded = navMenu.classList.contains('active');
-            navToggle.setAttribute('aria-expanded', isExpanded);
-        });
-    }
+        var refs = UI.getRefs();
+        var persisted = Storage.load();
+        var state = State.createInitialState(persisted);
 
-    // Smooth Scrolling for Anchor Links (Optional enhancement)
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href');
-            const targetElement = document.querySelector(targetId);
-            
-            if (targetElement) {
-                targetElement.scrollIntoView({
-                    behavior: 'smooth'
-                });
-                
-                // Close mobile menu if open
-                if (navMenu.classList.contains('active')) {
-                    navMenu.classList.remove('active');
-                    navToggle.setAttribute('aria-expanded', 'false');
+        var viewMeta = {
+            dashboard: {
+                title: "Dashboard",
+                subtitle: "Track spending. Stay under budget."
+            },
+            transactions: {
+                title: "Transactions",
+                subtitle: "Search, sort, and review every expense."
+            },
+            settings: {
+                title: "Settings",
+                subtitle: "Manage budget controls and data preferences."
+            }
+        };
+
+        var modalDraft = {
+            id: "",
+            description: "",
+            amount: "",
+            category: State.CATEGORIES[0],
+            date: todayIso(),
+            receiptName: ""
+        };
+
+        var renderQueued = false;
+
+        function todayIso() {
+            return new Date().toISOString().slice(0, 10);
+        }
+
+        function persistState() {
+            Storage.save(State.serializableState(state));
+        }
+
+        function queueRender() {
+            if (renderQueued) {
+                return;
+            }
+            renderQueued = true;
+            requestAnimationFrame(function () {
+                renderQueued = false;
+                render();
+            });
+        }
+
+        function getPivotDate() {
+            if (!state.transactions.length) {
+                return todayIso();
+            }
+
+            var max = state.transactions[0].date;
+            for (var i = 1; i < state.transactions.length; i += 1) {
+                if (state.transactions[i].date > max) {
+                    max = state.transactions[i].date;
                 }
             }
-        });
+            return max;
+        }
+
+        function getMonthTransactions(pivotDate) {
+            var monthKey = pivotDate.slice(0, 7);
+            return state.transactions.filter(function (tx) {
+                return tx.date.slice(0, 7) === monthKey;
+            });
+        }
+
+        function sumAmounts(rows) {
+            var total = 0;
+            for (var i = 0; i < rows.length; i += 1) {
+                total += Number(rows[i].amount) || 0;
+            }
+            return total;
+        }
+
+        function getCategoryTotals(rows) {
+            var map = Object.create(null);
+            for (var i = 0; i < rows.length; i += 1) {
+                var tx = rows[i];
+                map[tx.category] = (map[tx.category] || 0) + tx.amount;
+            }
+
+            var totals = [];
+            for (var key in map) {
+                if (Object.prototype.hasOwnProperty.call(map, key)) {
+                    totals.push({ category: key, amount: map[key] });
+                }
+            }
+
+            totals.sort(function (a, b) {
+                return b.amount - a.amount;
+            });
+
+            return totals;
+        }
+
+        function getWeeklyTotals(pivotDate) {
+            var dayMap = Object.create(null);
+            for (var i = 0; i < state.transactions.length; i += 1) {
+                var tx = state.transactions[i];
+                dayMap[tx.date] = (dayMap[tx.date] || 0) + tx.amount;
+            }
+
+            var pivot = new Date(pivotDate + "T00:00:00");
+            var out = [];
+
+            for (var d = 6; d >= 0; d -= 1) {
+                var day = new Date(pivot);
+                day.setDate(day.getDate() - d);
+                var iso = day.toISOString().slice(0, 10);
+                out.push({
+                    label: day.toLocaleDateString(undefined, { weekday: "short" }),
+                    amount: dayMap[iso] || 0
+                });
+            }
+
+            return out;
+        }
+
+        function getTransactionView() {
+            var pivotDate = getPivotDate();
+            var filtered = Search.filterTransactions(state.transactions, {
+                search: state.ui.search,
+                caseSensitive: state.settings.caseSensitive,
+                category: state.ui.category,
+                dateRange: state.ui.dateRange,
+                sort: state.ui.sort,
+                pivotDate: pivotDate
+            });
+
+            var page = Search.paginate(filtered.rows, state.ui.page, state.ui.pageSize);
+            state.ui.page = page.currentPage;
+            state.ui.regexError = filtered.regexError;
+
+            return {
+                pivotDate: pivotDate,
+                filteredRows: filtered.rows,
+                page: page,
+                regex: filtered.regex
+            };
+        }
+
+        function renderDashboard(viewData) {
+            var monthRows = getMonthTransactions(viewData.pivotDate);
+            var monthSpent = sumAmounts(monthRows);
+            var remaining = state.settings.budgetCap - monthSpent;
+            var progress = state.settings.budgetCap > 0 ? Math.min(100, (monthSpent / state.settings.budgetCap) * 100) : 0;
+            var monthDate = new Date(viewData.pivotDate + "T00:00:00");
+
+            refs.dashboardPeriod.textContent =
+                "This month (" + monthDate.toLocaleDateString(undefined, { month: "short", year: "numeric" }) + ")";
+
+            refs.spentValue.textContent = UI.formatMoneyFromRwf(monthSpent, state.settings);
+            refs.remainingValue.textContent = UI.formatMoneyFromRwf(Math.abs(remaining), state.settings);
+            refs.remainingValue.classList.toggle("danger", remaining < 0);
+            refs.remainingValue.classList.toggle("safe", remaining >= 0);
+            refs.transactionCountValue.textContent = String(monthRows.length);
+
+            refs.budgetProgressFill.style.width = progress.toFixed(1) + "%";
+            refs.progressRemainingText.innerHTML = "<strong>Remaining:</strong> " + UI.formatMoneyFromRwf(remaining, state.settings);
+
+            if (remaining >= 0) {
+                refs.progressStatus.textContent = "On track";
+                refs.progressStatus.classList.add("on-track");
+                refs.progressStatus.classList.remove("over");
+            } else {
+                refs.progressStatus.textContent = "Over budget";
+                refs.progressStatus.classList.add("over");
+                refs.progressStatus.classList.remove("on-track");
+            }
+
+            var categoryTotals = getCategoryTotals(monthRows);
+            UI.renderSpendList(refs, categoryTotals.slice(0, 6), monthSpent, state.settings);
+            UI.renderWeeklyBars(refs, getWeeklyTotals(viewData.pivotDate));
+
+            if (categoryTotals.length) {
+                var top = categoryTotals[0];
+                var pct = monthSpent > 0 ? Math.round((top.amount / monthSpent) * 100) : 0;
+                refs.insightTopCategory.innerHTML =
+                    "Highest spend category: <strong>" + Search.escapeHTML(top.category + " (" + pct + "%)") + "</strong>";
+            } else {
+                refs.insightTopCategory.innerHTML = "Highest spend category: <strong>None</strong>";
+            }
+
+            if (state.transactions.length) {
+                var biggest = state.transactions.slice().sort(function (a, b) {
+                    return b.amount - a.amount;
+                })[0];
+                refs.insightBiggest.innerHTML =
+                    "Biggest transaction: <strong>" +
+                    Search.escapeHTML(biggest.description + " (" + UI.formatMoneyFromRwf(biggest.amount, state.settings) + ")") +
+                    "</strong>";
+            } else {
+                refs.insightBiggest.innerHTML = "Biggest transaction: <strong>None</strong>";
+            }
+
+            refs.insightSearchCount.textContent =
+                viewData.filteredRows.length + " transactions match your current search.";
+
+            refs.budgetRemainingLine.innerHTML =
+                "Remaining this month: <strong>" + Search.escapeHTML(UI.formatMoneyFromRwf(remaining, state.settings)) + "</strong>";
+            if (remaining < 0) {
+                refs.budgetOverLine.hidden = false;
+                refs.budgetOverLine.textContent =
+                    "Over budget by " + UI.formatMoneyFromRwf(Math.abs(remaining), state.settings);
+            } else {
+                refs.budgetOverLine.hidden = true;
+            }
+        }
+
+        function renderTransactions(viewData) {
+            refs.txSearchInput.value = state.ui.search;
+            refs.caseSensitiveToggle.checked = state.settings.caseSensitive;
+            refs.settingsCaseSensitive.checked = state.settings.caseSensitive;
+            refs.categoryFilter.value = state.ui.category;
+            refs.dateRangeFilter.value = state.ui.dateRange;
+            refs.sortSelect.value = state.ui.sort;
+
+            refs.regexError.hidden = !state.ui.regexError;
+            refs.regexError.textContent = state.ui.regexError;
+
+            var page = viewData.page;
+            var filteredTotalSpent = sumAmounts(viewData.filteredRows);
+            var baseLine =
+                "Showing " +
+                (page.totalItems ? page.start + 1 : 0) +
+                "-" +
+                page.end +
+                " of " +
+                page.totalItems +
+                " transactions";
+
+            if (state.ui.search.trim()) {
+                baseLine += " matched '" + state.ui.search.trim() + "'";
+            }
+
+            baseLine += " - Total Spent: " + UI.formatMoneyFromRwf(filteredTotalSpent, state.settings);
+            refs.resultsLine.textContent = baseLine;
+
+            UI.renderTableRows(refs, page.pageItems, viewData.regex, state.settings);
+            UI.renderPagination(refs, page);
+        }
+
+        function renderSettings() {
+            refs.budgetCap.value = String(state.settings.budgetCap);
+            refs.baseCurrencySelect.value = state.settings.baseCurrency;
+            refs.usdRateInput.value = String(state.settings.usdToRwf);
+            refs.eurRateInput.value = String(state.settings.eurToRwf);
+        }
+
+        function renderModal() {
+            refs.modal.hidden = !state.ui.modalOpen;
+            if (!state.ui.modalOpen) {
+                return;
+            }
+
+            var isEditing = !!state.ui.editingId;
+            refs.modalTitle.textContent = isEditing ? "Edit Transaction" : "Add Transaction";
+            refs.saveTransactionBtn.textContent = isEditing ? "Save Changes" : "Add Transaction";
+
+            refs.editTransactionId.value = modalDraft.id || "";
+            refs.descriptionInput.value = modalDraft.description || "";
+            refs.amountInput.value = modalDraft.amount || "";
+            refs.categoryInput.value = modalDraft.category || State.CATEGORIES[0];
+            refs.dateInput.value = modalDraft.date || todayIso();
+            refs.receiptName.textContent = modalDraft.receiptName || "No file selected";
+        }
+
+        function render() {
+            var meta = viewMeta[state.ui.view] || viewMeta.dashboard;
+            UI.setView(refs, state.ui.view, meta);
+
+            var viewData = getTransactionView();
+            renderDashboard(viewData);
+            renderTransactions(viewData);
+            renderSettings();
+            renderModal();
+        }
+
+        function openModal(editId) {
+            UI.clearModalErrors(refs);
+            refs.transactionForm.reset();
+
+            if (editId) {
+                var target = state.transactions.find(function (tx) {
+                    return tx.id === editId;
+                });
+
+                if (!target) {
+                    return;
+                }
+
+                modalDraft = {
+                    id: target.id,
+                    description: target.description,
+                    amount: String(target.amount),
+                    category: target.category,
+                    date: target.date,
+                    receiptName: target.receiptName || ""
+                };
+                state.ui.editingId = editId;
+            } else {
+                modalDraft = {
+                    id: "",
+                    description: "",
+                    amount: "",
+                    category: State.CATEGORIES[0],
+                    date: getPivotDate(),
+                    receiptName: ""
+                };
+                state.ui.editingId = "";
+            }
+
+            refs.receiptInput.value = "";
+            state.ui.modalOpen = true;
+            queueRender();
+            setTimeout(function () {
+                refs.descriptionInput.focus();
+            }, 20);
+        }
+
+        function closeModal() {
+            state.ui.modalOpen = false;
+            state.ui.editingId = "";
+            queueRender();
+        }
+
+        function applySettingsPatch(patch) {
+            state.settings = Object.assign({}, state.settings, patch);
+            persistState();
+            queueRender();
+        }
+
+        function populateOptions() {
+            UI.renderOptions(refs.categoryFilter, [{ value: "all", label: "All Categories" }].concat(State.CATEGORIES), state.ui.category);
+            UI.renderOptions(refs.categoryInput, State.CATEGORIES, modalDraft.category);
+        }
+
+        function bindEvents() {
+            refs.viewButtons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                    state.ui.view = button.dataset.viewTarget;
+                    queueRender();
+                });
+            });
+
+            refs.goTopBtn.addEventListener("click", function () {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            });
+
+            refs.openModalButtons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                    openModal("");
+                });
+            });
+
+            refs.closeModalButtons.forEach(function (button) {
+                button.addEventListener("click", closeModal);
+            });
+
+            refs.modal.addEventListener("click", function (event) {
+                if (event.target === refs.modal) {
+                    closeModal();
+                }
+            });
+
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape" && state.ui.modalOpen) {
+                    closeModal();
+                }
+            });
+
+            var updateSearch = UI.debounce(function (value) {
+                state.ui.search = value;
+                state.ui.page = 1;
+                queueRender();
+            }, 100);
+
+            refs.txSearchInput.addEventListener("input", function (event) {
+                updateSearch(event.target.value);
+            });
+
+            refs.caseSensitiveToggle.addEventListener("change", function (event) {
+                applySettingsPatch({ caseSensitive: event.target.checked });
+                UI.setLiveMessage(refs, "Search case sensitivity updated.");
+            });
+
+            refs.settingsCaseSensitive.addEventListener("change", function (event) {
+                applySettingsPatch({ caseSensitive: event.target.checked });
+                UI.setLiveMessage(refs, "Search case sensitivity updated.");
+            });
+
+            refs.categoryFilter.addEventListener("change", function (event) {
+                state.ui.category = event.target.value;
+                state.ui.page = 1;
+                queueRender();
+            });
+
+            refs.dateRangeFilter.addEventListener("change", function (event) {
+                state.ui.dateRange = event.target.value;
+                state.ui.page = 1;
+                queueRender();
+            });
+
+            refs.sortSelect.addEventListener("change", function (event) {
+                state.ui.sort = event.target.value;
+                state.ui.page = 1;
+                queueRender();
+            });
+
+            refs.pagination.addEventListener("click", function (event) {
+                var button = event.target.closest("button[data-page]");
+                if (!button || button.disabled) {
+                    return;
+                }
+
+                var nextPage = Number(button.dataset.page);
+                if (!Number.isFinite(nextPage) || nextPage < 1) {
+                    return;
+                }
+
+                state.ui.page = nextPage;
+                queueRender();
+            });
+
+            refs.transactionsTbody.addEventListener("click", function (event) {
+                var editButton = event.target.closest("button[data-edit-id]");
+                if (!editButton) {
+                    return;
+                }
+                openModal(editButton.dataset.editId);
+            });
+
+            refs.budgetCap.addEventListener("change", function () {
+                var value = Number(refs.budgetCap.value);
+                if (!Number.isFinite(value) || value <= 0) {
+                    refs.budgetCap.value = String(state.settings.budgetCap);
+                    return;
+                }
+                applySettingsPatch({ budgetCap: Math.round(value) });
+                UI.setLiveMessage(refs, "Budget cap updated.");
+            });
+
+            refs.baseCurrencySelect.addEventListener("change", function () {
+                applySettingsPatch({ baseCurrency: refs.baseCurrencySelect.value });
+                UI.setLiveMessage(refs, "Base currency updated.");
+            });
+
+            refs.usdRateInput.addEventListener("change", function () {
+                var value = Number(refs.usdRateInput.value);
+                if (!Number.isFinite(value) || value <= 0) {
+                    refs.usdRateInput.value = String(state.settings.usdToRwf);
+                    return;
+                }
+                applySettingsPatch({ usdToRwf: Math.round(value) });
+                UI.setLiveMessage(refs, "USD conversion rate updated.");
+            });
+
+            refs.eurRateInput.addEventListener("change", function () {
+                var value = Number(refs.eurRateInput.value);
+                if (!Number.isFinite(value) || value <= 0) {
+                    refs.eurRateInput.value = String(state.settings.eurToRwf);
+                    return;
+                }
+                applySettingsPatch({ eurToRwf: Math.round(value) });
+                UI.setLiveMessage(refs, "EUR conversion rate updated.");
+            });
+
+            refs.exportBtn.addEventListener("click", function () {
+                Storage.exportJSON(State.serializableState(state));
+                UI.setLiveMessage(refs, "Data exported successfully.");
+            });
+
+            refs.importBtn.addEventListener("click", function () {
+                refs.importFileInput.click();
+            });
+
+            refs.importFileInput.addEventListener("change", function (event) {
+                var file = event.target.files && event.target.files[0];
+                Storage.importJSONFile(file)
+                    .then(function (data) {
+                        state = State.createInitialState(data);
+                        state.ui.view = "transactions";
+                        populateOptions();
+                        persistState();
+                        queueRender();
+                        UI.setLiveMessage(refs, "Data imported successfully.");
+                    })
+                    .catch(function (error) {
+                        UI.setLiveMessage(refs, error.message);
+                    })
+                    .finally(function () {
+                        refs.importFileInput.value = "";
+                    });
+            });
+
+            refs.resetDataBtn.addEventListener("click", function () {
+                if (!window.confirm("Reset all transactions and settings? This cannot be undone.")) {
+                    return;
+                }
+                state = State.createInitialState(null);
+                Storage.clear();
+                persistState();
+                populateOptions();
+                queueRender();
+                UI.setLiveMessage(refs, "All data was reset.");
+            });
+
+            refs.receiptTrigger.addEventListener("click", function () {
+                refs.receiptInput.click();
+            });
+
+            refs.receiptInput.addEventListener("change", function () {
+                var file = refs.receiptInput.files && refs.receiptInput.files[0];
+                modalDraft.receiptName = file ? file.name : "";
+                refs.receiptName.textContent = modalDraft.receiptName || "No file selected";
+            });
+
+            refs.transactionForm.addEventListener("submit", function (event) {
+                event.preventDefault();
+                UI.clearModalErrors(refs);
+
+                var input = {
+                    description: refs.descriptionInput.value,
+                    amount: refs.amountInput.value,
+                    category: refs.categoryInput.value,
+                    date: refs.dateInput.value,
+                    receiptName: modalDraft.receiptName
+                };
+
+                var validation = Validators.validateTransactionInput(input, State.CATEGORIES);
+
+                refs.descriptionHint.textContent = validation.hints.description || "";
+
+                if (!validation.isValid) {
+                    if (validation.errors.description) {
+                        refs.descriptionError.hidden = false;
+                        refs.descriptionError.textContent = validation.errors.description;
+                    }
+                    if (validation.errors.amount) {
+                        refs.amountError.hidden = false;
+                        refs.amountError.textContent = validation.errors.amount;
+                    }
+                    if (validation.errors.category) {
+                        refs.categoryError.hidden = false;
+                        refs.categoryError.textContent = validation.errors.category;
+                    }
+                    if (validation.errors.date) {
+                        refs.dateError.hidden = false;
+                        refs.dateError.textContent = validation.errors.date;
+                    }
+                    return;
+                }
+
+                var now = State.nowIso();
+                if (state.ui.editingId) {
+                    state.transactions = state.transactions.map(function (tx) {
+                        if (tx.id !== state.ui.editingId) {
+                            return tx;
+                        }
+                        return {
+                            id: tx.id,
+                            description: validation.values.description,
+                            amount: validation.values.amount,
+                            category: validation.values.category,
+                            date: validation.values.date,
+                            receiptName: validation.values.receiptName,
+                            createdAt: tx.createdAt,
+                            updatedAt: now
+                        };
+                    });
+
+                    UI.setLiveMessage(refs, "Transaction updated.");
+                } else {
+                    state.transactions.unshift(
+                        State.toTransaction({
+                            id: State.createId(),
+                            description: validation.values.description,
+                            amount: validation.values.amount,
+                            category: validation.values.category,
+                            date: validation.values.date,
+                            receiptName: validation.values.receiptName,
+                            createdAt: now,
+                            updatedAt: now
+                        })
+                    );
+
+                    UI.setLiveMessage(refs, "Transaction added.");
+                }
+
+                state.ui.view = "transactions";
+                state.ui.page = 1;
+
+                persistState();
+                closeModal();
+                queueRender();
+            });
+        }
+
+        populateOptions();
+        bindEvents();
+        persistState();
+        queueRender();
     });
-});
+})();
