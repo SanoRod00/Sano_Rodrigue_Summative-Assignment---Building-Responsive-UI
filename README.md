@@ -17,7 +17,6 @@ BudgetBuddy is a specialized web application designed to assist ALU students in 
 
 ![About Page](assets/wireframes-desktop%28About%20page%29.png)
 
-
 ### Wireframes
 
 BudgetBuddy’s layout structure and page designs were planned through low-fidelity wireframes.

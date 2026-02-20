@@ -199,11 +199,11 @@
             var tx = rows[i];
             html +=
                 "<tr>" +
-                "<td>" + APP.Search.escapeHTML(formatDate(tx.date)) + "</td>" +
-                "<td>" + APP.Search.highlightText(tx.description, regex) + "</td>" +
-                "<td><span class=\"badge " + badgeClassForCategory(tx.category) + "\">" + APP.Search.escapeHTML(tx.category) + "</span></td>" +
-                "<td class=\"amount-cell\">-" + APP.Search.escapeHTML(formatMoneyFromRwf(tx.amount, settings)) + "</td>" +
-                "<td><button type=\"button\" class=\"edit-btn\" data-edit-id=\"" + APP.Search.escapeHTML(tx.id) + "\">Edit</button></td>" +
+                "<td data-label=\"Date\">" + APP.Search.escapeHTML(formatDate(tx.date)) + "</td>" +
+                "<td data-label=\"Description\">" + APP.Search.highlightText(tx.description, regex) + "</td>" +
+                "<td data-label=\"Category\"><span class=\"badge " + badgeClassForCategory(tx.category) + "\">" + APP.Search.escapeHTML(tx.category) + "</span></td>" +
+                "<td data-label=\"Amount\" class=\"amount-cell\">-" + APP.Search.escapeHTML(formatMoneyFromRwf(tx.amount, settings)) + "</td>" +
+                "<td data-label=\"Actions\"><button type=\"button\" class=\"edit-btn\" data-edit-id=\"" + APP.Search.escapeHTML(tx.id) + "\">Edit</button></td>" +
                 "</tr>";
         }
 

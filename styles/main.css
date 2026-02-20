@@ -586,14 +586,6 @@ input:focus-visible {
     gap: 16px;
 }
 
-.creator-photo {
-    width: 88px;
-    height: 88px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #dce5f5;
-}
-
 .creator-head h3 {
     font-size: 2rem;
     line-height: 1.05;
@@ -747,14 +739,6 @@ input:focus-visible {
     margin-top: 2px;
     color: #d4def2;
     font-size: 1.04rem;
-}
-
-.workspace-avatar {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(255, 255, 255, 0.56);
 }
 
 .workspace-view {
@@ -1497,6 +1481,84 @@ body.modal-open {
     }
 }
 
+@media (max-width: 760px) {
+    .table-wrap {
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+    }
+
+    table {
+        min-width: 0;
+    }
+
+    table thead {
+        display: none;
+    }
+
+    table,
+    tbody,
+    tr,
+    td {
+        display: block;
+        width: 100%;
+    }
+
+    table tbody tr {
+        background: #f7f8fd;
+        border: 1px solid #dbe2f1;
+        border-radius: 14px;
+        margin-bottom: 12px;
+        overflow: hidden;
+    }
+
+    table tbody tr:last-child {
+        margin-bottom: 0;
+    }
+
+    table td {
+        border-bottom: 1px dashed #e0e5f2;
+        display: grid;
+        grid-template-columns: minmax(96px, 34%) 1fr;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+    }
+
+    table td:last-child {
+        border-bottom: 0;
+    }
+
+    table td::before {
+        content: attr(data-label);
+        color: #5a6a90;
+        font-size: 0.85rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .amount-cell {
+        text-align: left;
+    }
+
+    .edit-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .empty-row {
+        border: 0;
+        display: block;
+        text-align: center;
+    }
+
+    .empty-row::before {
+        content: "";
+        display: none;
+    }
+}
+
 @media (max-width: 620px) {
     .alu-hero {
         padding: 40px 0 32px;
@@ -1613,11 +1675,6 @@ body.modal-open {
 @media (max-width: 480px) {
     .workspace {
         padding: 12px;
-    }
-
-    .workspace-avatar {
-        width: 48px;
-        height: 48px;
     }
 
     .panel {
