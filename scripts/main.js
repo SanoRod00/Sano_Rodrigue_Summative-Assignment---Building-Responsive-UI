@@ -30,6 +30,12 @@
             }
         };
 
+        var initialView = document.body && document.body.dataset ? document.body.dataset.initialView : "";
+        if (initialView && viewMeta[initialView]) {
+            state.ui.view = initialView;
+        }
+        state.ui.modalOpen = false;
+
         var modalDraft = {
             id: "",
             description: "",
@@ -38,6 +44,9 @@
             date: todayIso(),
             receiptName: ""
         };
+        var modalStartSnapshot = null;
+        var modalDirty = false;
+        var closeAttemptLocked = false;
 
         var renderQueued = false;
 
@@ -187,7 +196,9 @@
 
             var categoryTotals = getCategoryTotals(monthRows);
             UI.renderSpendList(refs, categoryTotals.slice(0, 6), monthSpent, state.settings);
-            UI.renderWeeklyBars(refs, getWeeklyTotals(viewData.pivotDate));
+            if (refs.weeklyBars) {
+                UI.renderWeeklyBars(refs, getWeeklyTotals(viewData.pivotDate));
+            }
 
             if (categoryTotals.length) {
                 var top = categoryTotals[0];
@@ -266,6 +277,7 @@
 
         function renderModal() {
             refs.modal.hidden = !state.ui.modalOpen;
+            document.body.classList.toggle("modal-open", state.ui.modalOpen);
             if (!state.ui.modalOpen) {
                 return;
             }
@@ -280,6 +292,37 @@
             refs.categoryInput.value = modalDraft.category || State.CATEGORIES[0];
             refs.dateInput.value = modalDraft.date || todayIso();
             refs.receiptName.textContent = modalDraft.receiptName || "No file selected";
+        }
+
+        function getDraftSnapshot(values) {
+            var source = values || {};
+            return {
+                description: String(source.description || ""),
+                amount: String(source.amount || ""),
+                category: String(source.category || ""),
+                date: String(source.date || ""),
+                receiptName: String(source.receiptName || "")
+            };
+        }
+
+        function getCurrentModalSnapshot() {
+            return getDraftSnapshot({
+                description: refs.descriptionInput.value,
+                amount: refs.amountInput.value,
+                category: refs.categoryInput.value,
+                date: refs.dateInput.value,
+                receiptName: modalDraft.receiptName
+            });
+        }
+
+        function hasUnsavedModalChanges() {
+            if (!state.ui.modalOpen || !modalStartSnapshot) {
+                return false;
+            }
+            if (modalDirty) {
+                return true;
+            }
+            return JSON.stringify(getCurrentModalSnapshot()) !== JSON.stringify(modalStartSnapshot);
         }
 
         function render() {
@@ -329,16 +372,39 @@
 
             refs.receiptInput.value = "";
             state.ui.modalOpen = true;
+            modalDirty = false;
+            modalStartSnapshot = getDraftSnapshot(modalDraft);
             queueRender();
             setTimeout(function () {
                 refs.descriptionInput.focus();
             }, 20);
         }
 
-        function closeModal() {
+        function closeModal(forceClose) {
+            if (!forceClose && hasUnsavedModalChanges()) {
+                var shouldExit = window.confirm("You have unsaved changes. Exit this form anyway?");
+                if (!shouldExit) {
+                    return false;
+                }
+            }
             state.ui.modalOpen = false;
             state.ui.editingId = "";
+            modalDirty = false;
+            modalStartSnapshot = null;
             queueRender();
+            return true;
+        }
+
+        function requestCloseModal(forceClose) {
+            if (closeAttemptLocked) {
+                return false;
+            }
+            closeAttemptLocked = true;
+            var didClose = closeModal(!!forceClose);
+            setTimeout(function () {
+                closeAttemptLocked = false;
+            }, 0);
+            return didClose;
         }
 
         function applySettingsPatch(patch) {
@@ -353,6 +419,10 @@
         }
 
         function bindEvents() {
+            window.BudgetBuddyCloseModal = function (forceClose) {
+                return requestCloseModal(!!forceClose);
+            };
+
             refs.viewButtons.forEach(function (button) {
                 button.addEventListener("click", function () {
                     state.ui.view = button.dataset.viewTarget;
@@ -371,18 +441,21 @@
             });
 
             refs.closeModalButtons.forEach(function (button) {
-                button.addEventListener("click", closeModal);
+                button.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    requestCloseModal(false);
+                });
             });
 
             refs.modal.addEventListener("click", function (event) {
                 if (event.target === refs.modal) {
-                    closeModal();
+                    requestCloseModal(false);
                 }
             });
 
             document.addEventListener("keydown", function (event) {
                 if (event.key === "Escape" && state.ui.modalOpen) {
-                    closeModal();
+                    requestCloseModal(false);
                 }
             });
 
@@ -529,7 +602,20 @@
             refs.receiptInput.addEventListener("change", function () {
                 var file = refs.receiptInput.files && refs.receiptInput.files[0];
                 modalDraft.receiptName = file ? file.name : "";
+                modalDirty = true;
                 refs.receiptName.textContent = modalDraft.receiptName || "No file selected";
+            });
+
+            refs.transactionForm.addEventListener("input", function () {
+                if (state.ui.modalOpen) {
+                    modalDirty = true;
+                }
+            });
+
+            refs.transactionForm.addEventListener("change", function () {
+                if (state.ui.modalOpen) {
+                    modalDirty = true;
+                }
             });
 
             refs.transactionForm.addEventListener("submit", function (event) {
@@ -608,8 +694,7 @@
                 state.ui.page = 1;
 
                 persistState();
-                closeModal();
-                queueRender();
+                requestCloseModal(true);
             });
         }
 

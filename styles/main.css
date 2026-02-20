@@ -59,9 +59,76 @@ body {
     background-size: 3px 3px;
 }
 
+.site-topnav {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 5vw 14px;
+    background: rgba(248, 250, 255, 0.86);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(191, 204, 230, 0.6);
+}
+
+.top-brand {
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--navy);
+    text-decoration: none;
+}
+
+.top-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.top-links a {
+    text-decoration: none;
+    color: #22335a;
+    font-weight: 700;
+    font-size: 0.98rem;
+    padding: 8px 12px;
+    border-radius: 999px;
+    transition: background-color var(--dur) ease, color var(--dur) ease;
+}
+
+.top-links a:hover {
+    background: #e6eefc;
+    color: var(--navy);
+}
+
+.top-links a.is-active {
+    background: var(--navy);
+    color: #fff;
+}
+
 .page-main {
     width: min(1520px, 94vw);
-    margin: 46px auto 24px;
+    margin: 36px auto 24px;
+}
+
+@media (max-width: 720px) {
+    .site-topnav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .top-links {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .top-links a {
+        font-size: 0.9rem;
+        padding: 6px 10px;
+    }
 }
 
 .eyebrow {
@@ -646,20 +713,74 @@ input:focus-visible {
 }
 
 .insights-panel {
-    grid-column: span 2;
+    grid-column: span 5;
+    background: linear-gradient(180deg, #ffffff, #f5f7ff);
+    border: 1px solid #d7e1f3;
 }
 
-.insights-panel ul {
-    margin-top: 12px;
+.insights-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.insights-header p {
+    margin-top: 4px;
+    font-size: 0.92rem;
+    color: #52648f;
+}
+
+.insights-badge {
+    background: #e3efff;
+    color: #2453a3;
+    font-weight: 800;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    border-radius: 999px;
+}
+
+.insights-list {
+    margin-top: 6px;
     display: grid;
     gap: 12px;
     list-style: none;
 }
 
-.insights-panel li {
+.insights-list li {
     font-size: 0.95rem;
     line-height: 1.45;
     color: #22355d;
+    background: #f3f6ff;
+    border: 1px solid #d9e4f6;
+    padding: 12px 14px 12px 40px;
+    border-radius: 12px;
+    position: relative;
+}
+
+.insights-list li::before {
+    content: "";
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff4b55, #d71920);
+    box-shadow: 0 0 0 4px rgba(215, 25, 32, 0.15);
+}
+
+.insights-list li:nth-child(2)::before {
+    background: linear-gradient(135deg, #4aa3ff, #2b6bdc);
+    box-shadow: 0 0 0 4px rgba(43, 107, 220, 0.15);
+}
+
+.insights-list li:nth-child(3)::before {
+    background: linear-gradient(135deg, #3ccf91, #169d6d);
+    box-shadow: 0 0 0 4px rgba(22, 157, 109, 0.15);
 }
 
 .transactions-toolbar {
@@ -921,21 +1042,25 @@ mark {
     position: fixed;
     inset: 0;
     z-index: 40;
-    background: rgba(7, 18, 44, 0.5);
-    backdrop-filter: blur(4px);
+    background: linear-gradient(180deg, rgba(8, 23, 51, 0.52), rgba(8, 23, 51, 0.65));
+    backdrop-filter: blur(6px);
     display: grid;
     place-items: center;
     padding: 18px;
 }
 
+.modal-backdrop[hidden] {
+    display: none !important;
+}
+
 .modal {
-    width: min(860px, 94vw);
+    width: min(920px, 96vw);
     max-height: 92vh;
     overflow: auto;
-    border-radius: 20px;
-    border: 1px solid #bac8e1;
-    background: #fff;
-    box-shadow: 0 26px 60px rgba(4, 20, 45, 0.45);
+    border-radius: 22px;
+    border: 1px solid #b9c9e6;
+    background: linear-gradient(180deg, #ffffff, #f6f8fe);
+    box-shadow: 0 26px 60px rgba(4, 20, 45, 0.5);
 }
 
 .modal-header {
@@ -949,32 +1074,57 @@ mark {
 }
 
 .modal-header h2 {
-    font-size: 2.2rem;
+    font-size: clamp(1.8rem, 3vw, 2.2rem);
     letter-spacing: -0.02em;
 }
 
+.modal-subtitle {
+    margin-top: 6px;
+    font-size: 0.97rem;
+    color: #dbe8ff;
+    font-weight: 600;
+}
+
 .close-modal {
-    border: 0;
-    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.12);
     color: #fff;
-    font-size: 2rem;
-    line-height: 1;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    font-size: 1.9rem;
+    line-height: 1.1;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--dur) ease, background-color var(--dur) ease, border-color var(--dur) ease;
+}
+
+.close-modal:hover {
+    transform: scale(1.05);
+    border-color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.22);
 }
 
 .modal-body {
-    padding: 16px 24px 8px;
+    padding: 16px 24px 10px;
     display: grid;
-    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
 }
 
 .modal-field {
-    border: 1px solid #d6dceb;
+    border: 1px solid #d2dbee;
     border-radius: 12px;
-    background: #fafbfe;
+    background: linear-gradient(180deg, #ffffff, #f8faff);
     padding: 14px;
     display: grid;
     gap: 8px;
+}
+
+.modal-field-wide {
+    grid-column: 1 / -1;
 }
 
 .modal-field label {
@@ -993,6 +1143,11 @@ mark {
     font-size: 1.08rem;
 }
 
+.modal-field input:hover,
+.modal-field select:hover {
+    border-color: #acc1e5;
+}
+
 .modal-field select {
     border: 1px solid #c7d3e8;
     border-radius: 10px;
@@ -1008,20 +1163,26 @@ mark {
     font-weight: 700;
 }
 
+.receipt-zone {
+    align-items: center;
+    text-align: center;
+}
+
 .upload-receipt {
-    border: 1px dashed #c0cde4;
+    border: 1px dashed #aebfde;
     border-radius: 12px;
-    background: #f5f8ff;
+    background: linear-gradient(180deg, #f8fbff, #edf3ff);
     padding: 16px;
     font: inherit;
-    font-size: 1.3rem;
+    font-size: 1.16rem;
     font-weight: 800;
     color: #224783;
     cursor: pointer;
+    width: 100%;
 }
 
 .upload-receipt:hover {
-    background: #eef4ff;
+    background: linear-gradient(180deg, #f0f6ff, #e6efff);
 }
 
 .modal-footer {
@@ -1029,6 +1190,10 @@ mark {
     justify-content: center;
     gap: 10px;
     padding: 16px 24px 22px;
+}
+
+body.modal-open {
+    overflow: hidden;
 }
 
 .site-footer {
@@ -1216,6 +1381,10 @@ mark {
 
     .modal-header h2 {
         font-size: 1.7rem;
+    }
+
+    .modal-body {
+        grid-template-columns: 1fr;
     }
 
     .modal-footer {
