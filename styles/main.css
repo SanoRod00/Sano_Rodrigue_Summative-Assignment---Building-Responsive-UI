@@ -145,6 +145,39 @@ body.view-home .app-section {
     display: none;
 }
 
+body.view-dashboard .app-section,
+body.view-transactions .app-section,
+body.view-settings .app-section {
+    padding: 0;
+}
+
+body.view-dashboard .page-main,
+body.view-transactions .page-main,
+body.view-settings .page-main {
+    width: 100%;
+    margin-top: 0;
+}
+
+body.view-dashboard .app-window,
+body.view-transactions .app-window,
+body.view-settings .app-window {
+    max-width: none;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    border: 0;
+}
+
+body.view-home .alu-hero {
+    min-height: calc(100vh - 72px);
+}
+
+@media (max-width: 720px) {
+    body.view-home .alu-hero {
+        min-height: calc(100vh - 140px);
+    }
+}
+
 .alu-hero::before {
     content: "";
     position: absolute;

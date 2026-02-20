@@ -8,6 +8,9 @@
 
 **Target Audience:** African Leadership University (ALU) Students
 
+**Demo Video:**   https://www.loom.com/share/7d128b94fd2c49faaa14568742b7be68
+
+**Deployed github pages url:** 
 
 **Purpose:**
 BudgetBuddy is a specialized web application designed to assist ALU students in managing their personal finances. Recognizing the unique challenges of student life, this tool provides a robust platform for tracking expenses, analyzing spending habits, and adhering to monthly budget constraints. The application aims to foster financial literacy and discipline through an intuitive, accessible, and data-driven interface.
@@ -19,8 +22,9 @@ BudgetBuddy is a specialized web application designed to assist ALU students in 
 
 BudgetBuddy’s layout structure and page designs were planned through low-fidelity wireframes.
 
-Miro Board:
-https://miro.com/app/board/uXjVG-zaAqw=/?share_link_id=163649646526
+**Miro Board:** https://miro.com/app/board/uXjVG-zaAqw=/?share_link_id=163649646526
+
+
 
 ## 2. Features Overview
 
