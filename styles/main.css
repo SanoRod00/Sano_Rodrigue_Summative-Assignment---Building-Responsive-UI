@@ -115,12 +115,12 @@ body {
 .page-main {
     width: 100%;
     margin: 0;
-    padding: 0 0 32px;
+    padding: 0;
 }
 
 .app-section {
-    margin: 28px auto 0;
-    width: min(1400px, 92vw);
+    margin: 0;
+    width: 100%;
 }
 
 .alu-hero {
@@ -607,11 +607,12 @@ input:focus-visible {
 }
 
 .app-window {
-    border-radius: 22px;
+    border-radius: 0;
     overflow: hidden;
     background: var(--surface);
-    box-shadow: var(--shadow-soft);
-    border: 1px solid var(--line);
+    box-shadow: none;
+    border: 0;
+    width: 100%;
 }
 
 .app-shell {
@@ -1386,8 +1387,9 @@ body.modal-open {
 }
 
 .site-footer {
-    width: min(1520px, 94vw);
-    margin: 8px auto 26px;
+    width: 100%;
+    margin: 0;
+    padding: 12px 5vw 20px;
     text-align: center;
     color: #3e4d70;
     font-size: 1rem;
