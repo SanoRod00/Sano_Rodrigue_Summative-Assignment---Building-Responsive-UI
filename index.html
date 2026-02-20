@@ -28,8 +28,9 @@
         <section id="home" class="alu-hero" aria-labelledby="about-title">
             <div class="alu-hero-wrap">
                 <article class="alu-hero-copy">
-                    <p class="alu-eyebrow">African Leadership x BudgetBuddy</p>
-                    <h1 id="about-title">A student-first finance tracker inspired by ALU.</h1>
+                    <h1 id="about-title" aria-label="A student-first finance tracker inspired by ALU.">
+                        <span class="typing-text" data-text="A student-first finance tracker inspired by ALU."></span>
+                    </h1>
                     <p class="alu-lead">
                         BudgetBuddy helps African Leadership University students learn by doing. It turns day-to-day
                         campus spending into simple, clear insights so students can build confident money habits.
@@ -40,57 +41,10 @@
                         <a class="btn btn-secondary" href="transactions.html">View Transactions</a>
                     </div>
                 </article>
-
-                <aside class="alu-hero-visual" aria-label="ALU-inspired highlights">
-                    <div class="alu-hero-callout">
-                        <p class="alu-callout-title">Learn by Doing</p>
-                        <p class="alu-callout-copy">
-                            This project reflects ALU's hands-on model: real numbers, real habits, and real progress.
-                        </p>
-                    </div>
-                    <div class="alu-stat">
-                        <span class="alu-stat-number">246</span>
-                        <span class="alu-stat-label">ALU students launching successful ventures</span>
-                    </div>
-                </aside>
             </div>
         </section>
 
-        <section class="home-grid" aria-label="About BudgetBuddy">
-            <div class="home-cards">
-                <article class="value-card">
-                    <div class="value-icon" aria-hidden="true">◎</div>
-                    <div>
-                        <h2>Clarity First</h2>
-                        <p>Simple, distraction-free financial UI for busy students.</p>
-                    </div>
-                </article>
-
-                <article class="value-card">
-                    <div class="value-icon" aria-hidden="true">↗</div>
-                    <div>
-                        <h2>Obvious Numbers</h2>
-                        <p>Instantly readable spending insights with smart totals.</p>
-                    </div>
-                </article>
-
-                <article class="value-card">
-                    <div class="value-icon" aria-hidden="true">⚡</div>
-                    <div>
-                        <h2>Immediate Feedback</h2>
-                        <p>Budget status updates with clear visual signals.</p>
-                    </div>
-                </article>
-
-                <article class="value-card">
-                    <div class="value-icon" aria-hidden="true">♿</div>
-                    <div>
-                        <h2>Accessible by Default</h2>
-                        <p>Semantic markup and readable contrast from day one.</p>
-                    </div>
-                </article>
-            </div>
-
+        <section class="home-grid home-grid-single" aria-label="About the creator">
             <aside class="creator-panel" aria-label="About the creator">
                 <h2>About the Creator</h2>
                 <div class="creator-head">
@@ -111,6 +65,30 @@
     </main>
 
     <footer class="site-footer">© 2026 BudgetBuddy. All rights reserved.</footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var target = document.querySelector(".typing-text");
+            if (!target) {
+                return;
+            }
+            var text = target.dataset.text || "";
+            var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (reduceMotion) {
+                target.textContent = text;
+                return;
+            }
+            var i = 0;
+            function typeNext() {
+                target.textContent = text.slice(0, i);
+                i += 1;
+                if (i <= text.length) {
+                    window.setTimeout(typeNext, 45);
+                }
+            }
+            typeNext();
+        });
+    </script>
 </body>
 
 </html>

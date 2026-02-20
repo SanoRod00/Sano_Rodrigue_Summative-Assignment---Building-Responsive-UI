@@ -441,9 +441,11 @@
                 }
             });
 
-            refs.goTopBtn.addEventListener("click", function () {
-                window.scrollTo({ top: 0, behavior: "smooth" });
-            });
+            if (refs.goTopBtn) {
+                refs.goTopBtn.addEventListener("click", function () {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                });
+            }
 
             refs.openModalButtons.forEach(function (button) {
                 button.addEventListener("click", function () {

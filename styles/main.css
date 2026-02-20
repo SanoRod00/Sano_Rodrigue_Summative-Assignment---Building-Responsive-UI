@@ -113,22 +113,23 @@ body {
 }
 
 .page-main {
-    width: min(1520px, 94vw);
-    margin: 36px auto 24px;
+    width: 100%;
+    margin: 0;
+    padding: 0 0 32px;
 }
 
 .app-section {
-    margin-top: 36px;
+    margin: 28px auto 0;
+    width: min(1400px, 92vw);
 }
 
 .alu-hero {
     position: relative;
-    padding: 86px 0 56px;
+    padding: 90px 0 80px;
     background: linear-gradient(120deg, var(--alu-red) 0%, #b11f2a 45%, #0a3f78 100%);
     color: #fff;
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
-    margin-right: calc(50% - 50vw);
+    width: 100%;
+    margin: 0;
     overflow: hidden;
 }
 
@@ -145,10 +146,10 @@ body {
 .alu-hero-wrap {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    grid-template-columns: 1fr;
     gap: 32px;
     align-items: stretch;
-    width: min(1520px, 90vw);
+    width: min(1200px, 92vw);
     margin: 0 auto;
 }
 
@@ -165,12 +166,17 @@ body {
 }
 
 .alu-hero-copy h1 {
-    margin-top: 14px;
-    font-size: clamp(2.2rem, 4.2vw, 3.8rem);
+    margin-top: 0;
+    font-size: clamp(2.8rem, 5vw, 4.6rem);
     line-height: 1.08;
     letter-spacing: -0.02em;
     color: #fff;
-    max-width: 18ch;
+    max-width: 20ch;
+}
+
+.typing-text {
+    display: inline;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.35);
 }
 
 .alu-lead {
@@ -195,25 +201,25 @@ body {
 }
 
 .alu-hero .btn-primary {
-    background: #ffffff;
-    color: var(--alu-red);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+    background: var(--alu-red);
+    color: #fff;
+    box-shadow: 0 12px 28px rgba(194, 31, 42, 0.32);
 }
 
 .alu-hero .btn-primary:hover {
-    background: #f2f4fb;
-    color: var(--alu-red-dark);
+    background: var(--alu-red-dark);
+    color: #fff;
 }
 
 .alu-hero .btn-secondary {
-    background: transparent;
-    border-color: rgba(255, 255, 255, 0.7);
+    background: var(--alu-navy);
+    border-color: var(--alu-navy);
     color: #fff;
 }
 
 .alu-hero .btn-secondary:hover {
-    border-color: #fff;
-    background: rgba(255, 255, 255, 0.12);
+    background: #002b52;
+    border-color: #002b52;
 }
 
 .alu-hero-visual {
@@ -291,6 +297,13 @@ body {
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
     gap: 28px;
     align-items: start;
+}
+
+.home-grid-single {
+    grid-template-columns: 1fr;
+    width: min(1100px, 92vw);
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .home-cards {
@@ -483,11 +496,14 @@ input:focus-visible {
 
 .creator-panel {
     margin-top: 24px;
-    background: rgba(255, 255, 255, 0.9);
+    background: #fff;
     border: 1px solid #d4d9e7;
     border-radius: var(--radius-lg);
-    padding: 26px;
-    box-shadow: var(--shadow-soft);
+    padding: 28px 32px;
+    box-shadow: 0 14px 36px rgba(3, 27, 78, 0.12);
+    border-left: 6px solid var(--alu-red);
+    max-width: 980px;
+    margin-left: auto;
 }
 
 .creator-panel h2 {
@@ -602,6 +618,10 @@ input:focus-visible {
     display: grid;
     grid-template-columns: 170px 1fr;
     min-height: 840px;
+}
+
+.app-shell--single {
+    grid-template-columns: 1fr;
 }
 
 .app-sidebar {
@@ -1375,10 +1395,6 @@ body.modal-open {
 
 @media (max-width: 1320px) {
     .alu-hero-wrap {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .home-grid {
         grid-template-columns: 1fr;
     }
 
@@ -1394,7 +1410,7 @@ body.modal-open {
     }
 
     .alu-hero {
-        padding-top: 56px;
+        padding-top: 64px;
     }
 
     .workspace {
@@ -1420,16 +1436,7 @@ body.modal-open {
 
 @media (max-width: 840px) {
     .alu-hero-wrap {
-        grid-template-columns: 1fr;
         gap: 18px;
-    }
-
-    .alu-hero-visual {
-        border-radius: 32px;
-    }
-
-    .alu-stat {
-        align-self: flex-start;
     }
 
     .value-card h2 {
@@ -1494,22 +1501,13 @@ body.modal-open {
 
 @media (max-width: 620px) {
     .alu-hero {
-        padding: 36px 0 24px;
+        padding: 40px 0 32px;
     }
 
     .alu-hero-actions {
         margin-top: 18px;
         display: grid;
         grid-template-columns: 1fr;
-    }
-
-    .alu-hero-visual {
-        padding: 32px 24px;
-    }
-
-    .alu-stat {
-        width: 150px;
-        height: 150px;
     }
 
     .product-header {
