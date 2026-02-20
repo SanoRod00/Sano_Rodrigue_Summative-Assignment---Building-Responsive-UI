@@ -31,7 +31,10 @@
         };
 
         var initialView = document.body && document.body.dataset ? document.body.dataset.initialView : "";
-        if (initialView && viewMeta[initialView]) {
+        var hashView = window.location.hash ? window.location.hash.replace("#", "") : "";
+        if (hashView && viewMeta[hashView]) {
+            state.ui.view = hashView;
+        } else if (initialView && viewMeta[initialView]) {
             state.ui.view = initialView;
         }
         state.ui.modalOpen = false;
@@ -428,6 +431,14 @@
                     state.ui.view = button.dataset.viewTarget;
                     queueRender();
                 });
+            });
+
+            window.addEventListener("hashchange", function () {
+                var nextHash = window.location.hash ? window.location.hash.replace("#", "") : "";
+                if (nextHash && viewMeta[nextHash]) {
+                    state.ui.view = nextHash;
+                    queueRender();
+                }
             });
 
             refs.goTopBtn.addEventListener("click", function () {

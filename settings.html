@@ -26,211 +26,207 @@
     </header>
 
     <main class="page-main">
-        <div class="app-window" role="region" aria-label="BudgetBuddy application">
-            <div class="window-bar" aria-hidden="true">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-
-            <div class="app-shell">
-                <aside class="app-sidebar" aria-label="Main navigation">
-                    <div class="sidebar-brand">BudgetBuddy</div>
-                    <nav class="sidebar-nav">
-                        <button class="nav-btn active" data-view-target="dashboard" type="button">Dashboard</button>
-                        <button class="nav-btn" data-view-target="transactions" type="button">Transactions</button>
-                        <button class="nav-btn" data-view-target="settings" type="button">Settings</button>
-                    </nav>
-                    <div class="sidebar-foot">
-                        <button class="ghost-btn" type="button" id="goTopBtn" aria-label="Scroll to top">Back</button>
-                    </div>
-                </aside>
-
-                <div class="workspace">
-                    <header class="workspace-header">
-                        <div>
-                            <h3 id="workspace-title">Dashboard</h3>
-                            <p id="workspace-subtitle">Track spending. Stay under budget.</p>
+        <section class="app-section" aria-label="BudgetBuddy workspace">
+            <div class="app-window" role="region" aria-label="BudgetBuddy application">
+                <div class="app-shell">
+                    <aside class="app-sidebar" aria-label="Main navigation">
+                        <div class="sidebar-brand">BudgetBuddy</div>
+                        <nav class="sidebar-nav">
+                            <button class="nav-btn active" data-view-target="dashboard" type="button">Dashboard</button>
+                            <button class="nav-btn" data-view-target="transactions" type="button">Transactions</button>
+                            <button class="nav-btn" data-view-target="settings" type="button">Settings</button>
+                        </nav>
+                        <div class="sidebar-foot">
+                            <button class="ghost-btn" type="button" id="goTopBtn" aria-label="Scroll to top">Back</button>
                         </div>
-                        <div class="workspace-tools">
-                            <img src="assets/p3.jpg" alt="Profile avatar" class="workspace-avatar">
-                        </div>
-                    </header>
+                    </aside>
 
-                    <section class="workspace-view" data-view="dashboard" aria-label="Dashboard view">
-                        <div class="dashboard-top-actions">
-                            <div class="search-pill" id="dashboardPeriod">This month</div>
-                            <button class="btn btn-primary" type="button" data-open-modal>Add transaction</button>
-                        </div>
+                    <div class="workspace">
+                        <header class="workspace-header">
+                            <div>
+                                <h3 id="workspace-title">Dashboard</h3>
+                                <p id="workspace-subtitle">Track spending. Stay under budget.</p>
+                            </div>
+                            <div class="workspace-tools">
+                                <img src="assets/p3.jpg" alt="Profile avatar" class="workspace-avatar">
+                            </div>
+                        </header>
 
-                        <div class="dashboard-grid">
-                            <article class="panel stat-panel">
-                                <header>
-                                    <h4>This Month</h4>
-                                </header>
-                                <div class="stat-row">
-                                    <div class="stat-card">
-                                        <span>Spent</span>
-                                        <strong class="danger" id="spentValue">0 RWF</strong>
+                        <section class="workspace-view" data-view="dashboard" aria-label="Dashboard view">
+                            <div class="dashboard-top-actions">
+                                <div class="search-pill" id="dashboardPeriod">This month</div>
+                                <button class="btn btn-primary" type="button" data-open-modal>Add transaction</button>
+                            </div>
+
+                            <div class="dashboard-grid">
+                                <article class="panel stat-panel">
+                                    <header>
+                                        <h4>This Month</h4>
+                                    </header>
+                                    <div class="stat-row">
+                                        <div class="stat-card">
+                                            <span>Spent</span>
+                                            <strong class="danger" id="spentValue">0 RWF</strong>
+                                        </div>
+                                        <div class="stat-card">
+                                            <span>Remaining</span>
+                                            <strong class="safe" id="remainingValue">0 RWF</strong>
+                                        </div>
+                                        <div class="stat-card">
+                                            <span>Transactions</span>
+                                            <strong id="transactionCountValue">0</strong>
+                                        </div>
                                     </div>
-                                    <div class="stat-card">
-                                        <span>Remaining</span>
-                                        <strong class="safe" id="remainingValue">0 RWF</strong>
+                                </article>
+
+                                <article class="panel progress-panel">
+                                    <header>
+                                        <h4>Budget Progress</h4>
+                                        <span>This Month</span>
+                                    </header>
+                                    <div class="progress-track">
+                                        <span class="progress-fill" id="budgetProgressFill"></span>
                                     </div>
-                                    <div class="stat-card">
-                                        <span>Transactions</span>
-                                        <strong id="transactionCountValue">0</strong>
-                                    </div>
-                                </div>
-                            </article>
+                                    <p id="progressRemainingText"><strong>Remaining:</strong> 0 RWF</p>
+                                    <div class="status-pill" id="progressStatus">On track</div>
+                                </article>
 
-                            <article class="panel progress-panel">
-                                <header>
-                                    <h4>Budget Progress</h4>
-                                    <span>This Month</span>
-                                </header>
-                                <div class="progress-track">
-                                    <span class="progress-fill" id="budgetProgressFill"></span>
-                                </div>
-                                <p id="progressRemainingText"><strong>Remaining:</strong> 0 RWF</p>
-                                <div class="status-pill" id="progressStatus">On track</div>
-                            </article>
+                                <article class="panel spend-panel">
+                                    <h4>Where your money goes</h4>
+                                    <ul id="spendList"></ul>
+                                </article>
 
-                            <article class="panel spend-panel">
-                                <h4>Where your money goes</h4>
-                                <ul id="spendList"></ul>
-                            </article>
+                                <article class="panel insights-panel">
+                                    <header class="insights-header">
+                                        <div>
+                                            <h4>Insights</h4>
+                                            <p class="muted">Personalized from your data</p>
+                                        </div>
+                                        <span class="insights-badge">Live</span>
+                                    </header>
+                                    <ul class="insights-list">
+                                        <li id="insightTopCategory">Highest spend category: <strong>None</strong></li>
+                                        <li id="insightBiggest">Biggest transaction: <strong>None</strong></li>
+                                        <li id="insightSearchCount">0 transactions match your current search.</li>
+                                    </ul>
+                                </article>
+                            </div>
+                        </section>
 
-                            <article class="panel insights-panel">
-                                <header class="insights-header">
-                                    <div>
-                                        <h4>Insights</h4>
-                                        <p class="muted">Personalized from your data</p>
-                                    </div>
-                                    <span class="insights-badge">Live</span>
-                                </header>
-                                <ul class="insights-list">
-                                    <li id="insightTopCategory">Highest spend category: <strong>None</strong></li>
-                                    <li id="insightBiggest">Biggest transaction: <strong>None</strong></li>
-                                    <li id="insightSearchCount">0 transactions match your current search.</li>
-                                </ul>
-                            </article>
-                        </div>
-                    </section>
+                        <section class="workspace-view" data-view="transactions" aria-label="Transactions view">
+                            <div class="transactions-toolbar">
+                                <label for="txSearchInput" class="sr-only">Search using regex</label>
+                                <input class="toolbar-input" id="txSearchInput" type="text" autocomplete="off"
+                                    placeholder="Search description (regex supported)">
 
-                    <section class="workspace-view" data-view="transactions" aria-label="Transactions view">
-                        <div class="transactions-toolbar">
-                            <label for="txSearchInput" class="sr-only">Search using regex</label>
-                            <input class="toolbar-input" id="txSearchInput" type="text" autocomplete="off"
-                                placeholder="Search description (regex supported)">
-
-                            <label class="case-toggle" for="caseSensitiveToggle">
-                                <input id="caseSensitiveToggle" type="checkbox">
-                                <span>Case-sensitive</span>
-                            </label>
-
-                            <label for="categoryFilter" class="sr-only">Filter by category</label>
-                            <select class="toolbar-select" id="categoryFilter"></select>
-
-                            <label for="dateRangeFilter" class="sr-only">Filter by period</label>
-                            <select class="toolbar-select" id="dateRangeFilter">
-                                <option value="this-month">This Month</option>
-                                <option value="last-30" selected>Last 30 Days</option>
-                                <option value="last-90">Last 90 Days</option>
-                                <option value="all">All Time</option>
-                            </select>
-
-                            <label for="sortSelect" class="sr-only">Sort transactions</label>
-                            <select class="toolbar-select" id="sortSelect">
-                                <option value="date_desc">Sort: Newest</option>
-                                <option value="date_asc">Sort: Oldest</option>
-                                <option value="amount_desc">Sort: Amount High-Low</option>
-                                <option value="amount_asc">Sort: Amount Low-High</option>
-                                <option value="description_asc">Sort: Description A-Z</option>
-                                <option value="description_desc">Sort: Description Z-A</option>
-                            </select>
-
-                            <button class="btn btn-primary" type="button" data-open-modal>Add Transaction</button>
-                        </div>
-
-                        <p class="error-text" id="regexError" hidden>Invalid regex pattern.</p>
-                        <p class="results-line" id="resultsLine">Showing 0 transactions.</p>
-
-                        <div class="table-wrap" role="region" aria-label="Transactions table">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Description</th>
-                                        <th>Category</th>
-                                        <th>Amount</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="transactionsTbody"></tbody>
-                            </table>
-                        </div>
-
-                        <div class="pagination" id="pagination" aria-label="Pagination"></div>
-                    </section>
-
-                    <section class="workspace-view" data-view="settings" aria-label="Settings view">
-                        <div class="settings-grid">
-                            <article class="panel settings-card">
-                                <h4>Budget Controls</h4>
-                                <div class="form-row">
-                                    <label for="budgetCap">Monthly Budget Cap (RWF)</label>
-                                    <input id="budgetCap" type="number" min="1" step="100" inputmode="numeric">
-                                </div>
-                                <p class="muted">Set your spending limit for the month.</p>
-                                <hr>
-                                <p id="budgetRemainingLine">Remaining this month: <strong>0 RWF</strong></p>
-                                <p class="danger" id="budgetOverLine">Over budget by 0 RWF</p>
-                            </article>
-
-                            <article class="panel settings-card">
-                                <h4>Currency Preferences</h4>
-                                <div class="form-row two-col">
-                                    <label for="baseCurrencySelect">Base Currency</label>
-                                    <select class="toolbar-select" id="baseCurrencySelect">
-                                        <option value="RWF">RWF</option>
-                                        <option value="USD">USD</option>
-                                        <option value="EUR">EUR</option>
-                                    </select>
-                                </div>
-                                <div class="form-row two-col">
-                                    <label for="usdRateInput">USD to RWF</label>
-                                    <input id="usdRateInput" type="number" min="1" step="1" inputmode="numeric">
-                                </div>
-                                <div class="form-row two-col">
-                                    <label for="eurRateInput">EUR to RWF</label>
-                                    <input id="eurRateInput" type="number" min="1" step="1" inputmode="numeric">
-                                </div>
-                                <label class="case-toggle" for="settingsCaseSensitive">
-                                    <input id="settingsCaseSensitive" type="checkbox">
-                                    <span>Regex search is case-sensitive</span>
+                                <label class="case-toggle" for="caseSensitiveToggle">
+                                    <input id="caseSensitiveToggle" type="checkbox">
+                                    <span>Case-sensitive</span>
                                 </label>
-                            </article>
 
-                            <article class="panel settings-card">
-                                <h4>Data Management</h4>
-                                <div class="settings-actions">
-                                    <button class="edit-btn" type="button" id="importBtn">Import Data (JSON)</button>
-                                    <button class="edit-btn" type="button" id="exportBtn">Export Data (JSON)</button>
-                                </div>
-                                <input id="importFileInput" type="file" accept="application/json" hidden>
-                            </article>
+                                <label for="categoryFilter" class="sr-only">Filter by category</label>
+                                <select class="toolbar-select" id="categoryFilter"></select>
 
-                            <article class="panel settings-card danger-zone">
-                                <h4>Danger Zone</h4>
-                                <button class="danger-outline" type="button" id="resetDataBtn">Reset Data</button>
-                                <p class="danger">This action cannot be undone.</p>
-                            </article>
-                        </div>
-                    </section>
+                                <label for="dateRangeFilter" class="sr-only">Filter by period</label>
+                                <select class="toolbar-select" id="dateRangeFilter">
+                                    <option value="this-month">This Month</option>
+                                    <option value="last-30" selected>Last 30 Days</option>
+                                    <option value="last-90">Last 90 Days</option>
+                                    <option value="all">All Time</option>
+                                </select>
+
+                                <label for="sortSelect" class="sr-only">Sort transactions</label>
+                                <select class="toolbar-select" id="sortSelect">
+                                    <option value="date_desc">Sort: Newest</option>
+                                    <option value="date_asc">Sort: Oldest</option>
+                                    <option value="amount_desc">Sort: Amount High-Low</option>
+                                    <option value="amount_asc">Sort: Amount Low-High</option>
+                                    <option value="description_asc">Sort: Description A-Z</option>
+                                    <option value="description_desc">Sort: Description Z-A</option>
+                                </select>
+
+                                <button class="btn btn-primary" type="button" data-open-modal>Add Transaction</button>
+                            </div>
+
+                            <p class="error-text" id="regexError" hidden>Invalid regex pattern.</p>
+                            <p class="results-line" id="resultsLine">Showing 0 transactions.</p>
+
+                            <div class="table-wrap" role="region" aria-label="Transactions table">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Description</th>
+                                            <th>Category</th>
+                                            <th>Amount</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="transactionsTbody"></tbody>
+                                </table>
+                            </div>
+
+                            <div class="pagination" id="pagination" aria-label="Pagination"></div>
+                        </section>
+
+                        <section class="workspace-view" data-view="settings" aria-label="Settings view">
+                            <div class="settings-grid">
+                                <article class="panel settings-card">
+                                    <h4>Budget Controls</h4>
+                                    <div class="form-row">
+                                        <label for="budgetCap">Monthly Budget Cap (RWF)</label>
+                                        <input id="budgetCap" type="number" min="1" step="100" inputmode="numeric">
+                                    </div>
+                                    <p class="muted">Set your spending limit for the month.</p>
+                                    <hr>
+                                    <p id="budgetRemainingLine">Remaining this month: <strong>0 RWF</strong></p>
+                                    <p class="danger" id="budgetOverLine">Over budget by 0 RWF</p>
+                                </article>
+
+                                <article class="panel settings-card">
+                                    <h4>Currency Preferences</h4>
+                                    <div class="form-row two-col">
+                                        <label for="baseCurrencySelect">Base Currency</label>
+                                        <select class="toolbar-select" id="baseCurrencySelect">
+                                            <option value="RWF">RWF</option>
+                                            <option value="USD">USD</option>
+                                            <option value="EUR">EUR</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-row two-col">
+                                        <label for="usdRateInput">USD to RWF</label>
+                                        <input id="usdRateInput" type="number" min="1" step="1" inputmode="numeric">
+                                    </div>
+                                    <div class="form-row two-col">
+                                        <label for="eurRateInput">EUR to RWF</label>
+                                        <input id="eurRateInput" type="number" min="1" step="1" inputmode="numeric">
+                                    </div>
+                                    <label class="case-toggle" for="settingsCaseSensitive">
+                                        <input id="settingsCaseSensitive" type="checkbox">
+                                        <span>Regex search is case-sensitive</span>
+                                    </label>
+                                </article>
+
+                                <article class="panel settings-card">
+                                    <h4>Data Management</h4>
+                                    <div class="settings-actions">
+                                        <button class="edit-btn" type="button" id="importBtn">Import Data (JSON)</button>
+                                        <button class="edit-btn" type="button" id="exportBtn">Export Data (JSON)</button>
+                                    </div>
+                                    <input id="importFileInput" type="file" accept="application/json" hidden>
+                                </article>
+
+                                <article class="panel settings-card danger-zone">
+                                    <h4>Danger Zone</h4>
+                                    <button class="danger-outline" type="button" id="resetDataBtn">Reset Data</button>
+                                    <p class="danger">This action cannot be undone.</p>
+                                </article>
+                            </div>
+                        </section>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
     </main>
 
     <div class="modal-backdrop" id="addModal" hidden>

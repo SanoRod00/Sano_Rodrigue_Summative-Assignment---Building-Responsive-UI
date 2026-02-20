@@ -159,12 +159,7 @@ The application utilizes the browser's `localStorage` API. Every time a transact
 
 ## 10. Tests
 
-A dedicated `tests.html` file is included in the project. This suite is designed to verify the core logic of the application without manual intervention. It primarily focuses on:
-*   Validating the Regex patterns against various test cases.
-*   Ensuring the calculation logic for totals and remaining budget is accurate.
-*   Verifying that the sorting algorithms correctly order data.
-
-Running these tests serves as a quality assurance step to confirm the reliability of the application's mathematical and validation functions.
+No separate test runner is included. Core behaviors (regex validation, sorting, budget calculations) can be verified directly in the app using the UI controls.
 
 ## 11. How to Run
 
