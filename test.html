@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BudgetBuddy | Test Page</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+  <div class="page-noise" aria-hidden="true"></div>
+
+  <header class="site-topnav">
+    <a class="top-brand" href="#">BudgetBuddy</a>
+    <nav class="top-links" aria-label="Test navigation">
+      <a class="is-active" href="#">Test</a>
+      <a href="#">Dashboard</a>
+      <a href="#">Transactions</a>
+      <a href="#">Settings</a>
+    </nav>
+  </header>
+
+  <main class="page-main">
+    <section class="app-section" aria-label="Test section">
+      <div class="app-window" role="region" aria-label="Test container">
+        <div class="app-shell app-shell--single">
+          <div class="workspace">
+            <header class="workspace-header">
+              <div>
+                <h3>Responsive Test</h3>
+                <p>Use this page to verify layout, spacing, and tap targets.</p>
+              </div>
+              <div class="workspace-tools">
+                <img src="assets/s.jpg" alt="Profile avatar" class="workspace-avatar">
+              </div>
+            </header>
+
+            <div class="dashboard-top-actions">
+              <div class="search-pill">This month</div>
+              <button class="btn btn-primary" type="button">Primary Action</button>
+            </div>
+
+            <div class="dashboard-grid">
+              <article class="panel stat-panel">
+                <h4>Card Group</h4>
+                <div class="stat-row">
+                  <div class="stat-card">
+                    <span>Spent</span>
+                    <strong class="danger">12,500 RWF</strong>
+                  </div>
+                  <div class="stat-card">
+                    <span>Remaining</span>
+                    <strong class="safe">7,500 RWF</strong>
+                  </div>
+                  <div class="stat-card">
+                    <span>Transactions</span>
+                    <strong>8</strong>
+                  </div>
+                </div>
+              </article>
+
+              <article class="panel spend-panel">
+                <h4>Spend Breakdown</h4>
+                <ul>
+                  <li>
+                    <span>Meals</span>
+                    <div class="meter"><i style="width:60%"></i></div>
+                    <strong>6,000 RWF</strong>
+                  </li>
+                  <li>
+                    <span>Transport</span>
+                    <div class="meter"><i style="width:25%"></i></div>
+                    <strong>2,500 RWF</strong>
+                  </li>
+                  <li>
+                    <span>Books</span>
+                    <div class="meter"><i style="width:15%"></i></div>
+                    <strong>1,500 RWF</strong>
+                  </li>
+                </ul>
+              </article>
+
+              <article class="panel insights-panel">
+                <h4>Form + Buttons</h4>
+                <div class="settings-grid">
+                  <div class="settings-card">
+                    <div class="form-row">
+                      <label for="testInput">Text input</label>
+                      <input id="testInput" type="text" placeholder="Type here">
+                    </div>
+                    <div class="form-row two-col">
+                      <label for="testNumber">Number</label>
+                      <input id="testNumber" type="number" placeholder="0">
+                    </div>
+                    <div class="settings-actions">
+                      <button class="btn btn-primary" type="button">Save</button>
+                      <button class="btn btn-secondary" type="button">Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <div class="transactions-toolbar" style="margin-top:18px;">
+              <input class="toolbar-input" type="text" placeholder="Search description (regex supported)">
+              <label class="case-toggle">
+                <input type="checkbox">
+                <span>Case-sensitive</span>
+              </label>
+              <select class="toolbar-select">
+                <option>Category</option>
+              </select>
+              <select class="toolbar-select">
+                <option>Last 30 Days</option>
+              </select>
+              <select class="toolbar-select">
+                <option>Sort: Newest</option>
+              </select>
+              <button class="btn btn-primary" type="button">Add Transaction</button>
+            </div>
+
+            <div class="table-wrap" role="region" aria-label="Test table" style="margin-top:12px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>2026-02-20</td>
+                    <td>Stationery</td>
+                    <td><span class="badge soft-blue">School</span></td>
+                    <td class="amount-cell">-1,200 RWF</td>
+                    <td><button type="button" class="edit-btn">Edit</button></td>
+                  </tr>
+                  <tr>
+                    <td>2026-02-18</td>
+                    <td>Lunch</td>
+                    <td><span class="badge soft-red">Food</span></td>
+                    <td class="amount-cell">-2,300 RWF</td>
+                    <td><button type="button" class="edit-btn">Edit</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <footer class="site-footer">Test checklist below</footer>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="app-section" aria-label="Checklist" style="padding-top: 0;">
+      <div class="app-window">
+        <div class="panel" style="margin: 0 auto;">
+          <h4>Quick Test Checklist</h4>
+          <ul style="margin-top: 10px; padding-left: 20px;">
+            <li>Resize to 375px width: nav wraps, buttons are full-width, no horizontal scrolling.</li>
+            <li>Resize to 768px width: dashboard cards align in two columns.</li>
+            <li>Resize to 1200px+ width: app window centers with readable line lengths.</li>
+            <li>Check tap targets: buttons and selects are easy to tap on mobile.</li>
+            <li>Verify table overflow: table scrolls horizontally on small screens.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
