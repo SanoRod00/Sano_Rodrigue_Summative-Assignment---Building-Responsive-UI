@@ -10,7 +10,7 @@
 
 **Demo Video:**   https://www.loom.com/share/7d128b94fd2c49faaa14568742b7be68
 
-**Deployed github pages url:** 
+**Deployed github pages url:** https://sanorod00.github.io/Sano_Rodrigue_Summative-Assignment---Building-Responsive-UI/
 
 **Purpose:**
 BudgetBuddy is a specialized web application designed to assist ALU students in managing their personal finances. Recognizing the unique challenges of student life, this tool provides a robust platform for tracking expenses, analyzing spending habits, and adhering to monthly budget constraints. The application aims to foster financial literacy and discipline through an intuitive, accessible, and data-driven interface.
