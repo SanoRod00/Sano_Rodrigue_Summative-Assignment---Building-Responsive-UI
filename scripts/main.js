@@ -96,6 +96,20 @@
             return "dashboard";
         }
 
+        function setBodyViewClass(viewName) {
+            var target = viewName || "home";
+            document.body.classList.remove("view-home", "view-dashboard", "view-transactions", "view-settings");
+            document.body.classList.add("view-" + target);
+        }
+
+        function hashToView() {
+            var hash = window.location.hash ? window.location.hash.replace("#", "") : "";
+            if (hash === "dashboard" || hash === "transactions" || hash === "settings") {
+                return hash;
+            }
+            return "home";
+        }
+
         function getPivotDate() {
             if (!state.transactions.length) {
                 return todayIso();
@@ -384,6 +398,7 @@
             if (state.ui.view !== resolvedView) {
                 state.ui.view = resolvedView;
             }
+            setBodyViewClass(hashToView());
             var meta = viewMeta[resolvedView] || viewMeta.dashboard;
             UI.setView(refs, resolvedView, meta);
 
@@ -505,6 +520,7 @@
                     state.ui.view = nextHash;
                     queueRender();
                 }
+                setBodyViewClass(hashToView());
             });
 
             refs.openModalButtons.forEach(function (button) {

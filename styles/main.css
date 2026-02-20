@@ -135,6 +135,16 @@ body {
     overflow: hidden;
 }
 
+body.view-dashboard .alu-hero,
+body.view-transactions .alu-hero,
+body.view-settings .alu-hero {
+    display: none;
+}
+
+body.view-home .app-section {
+    display: none;
+}
+
 .alu-hero::before {
     content: "";
     position: absolute;
