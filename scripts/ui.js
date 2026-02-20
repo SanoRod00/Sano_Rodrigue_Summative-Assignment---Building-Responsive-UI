@@ -14,13 +14,13 @@
 
             dashboardPeriod: document.getElementById("dashboardPeriod"),
             spentValue: document.getElementById("spentValue"),
+            remainingLabel: document.getElementById("remainingLabel"),
             remainingValue: document.getElementById("remainingValue"),
             transactionCountValue: document.getElementById("transactionCountValue"),
             budgetProgressFill: document.getElementById("budgetProgressFill"),
             progressRemainingText: document.getElementById("progressRemainingText"),
             progressStatus: document.getElementById("progressStatus"),
             spendList: document.getElementById("spendList"),
-            weeklyBars: document.getElementById("weeklyBars"),
             insightTopCategory: document.getElementById("insightTopCategory"),
             insightBiggest: document.getElementById("insightBiggest"),
             insightSearchCount: document.getElementById("insightSearchCount"),
@@ -65,7 +65,8 @@
             receiptInput: document.getElementById("receiptInput"),
             receiptTrigger: document.getElementById("receiptTrigger"),
             receiptName: document.getElementById("receiptName"),
-            saveTransactionBtn: document.getElementById("saveTransactionBtn")
+            saveTransactionBtn: document.getElementById("saveTransactionBtn"),
+            deleteTransactionBtn: document.getElementById("deleteTransactionBtn")
         };
     }
 
@@ -186,30 +187,6 @@
         refs.spendList.innerHTML = html;
     }
 
-    function renderWeeklyBars(refs, dayTotals) {
-        if (!dayTotals.length) {
-            refs.weeklyBars.innerHTML = "";
-            return;
-        }
-
-        var max = 0;
-        for (var i = 0; i < dayTotals.length; i += 1) {
-            if (dayTotals[i].amount > max) {
-                max = dayTotals[i].amount;
-            }
-        }
-
-        if (max <= 0) {
-            max = 1;
-        }
-
-        var html = "";
-        for (var j = 0; j < dayTotals.length; j += 1) {
-            var ratio = Math.max(10, Math.round((dayTotals[j].amount / max) * 100));
-            html += "<span title=\"" + APP.Search.escapeHTML(dayTotals[j].label + ": " + dayTotals[j].amount) + "\" style=\"height:" + ratio + "%\"></span>";
-        }
-        refs.weeklyBars.innerHTML = html;
-    }
 
     function renderTableRows(refs, rows, regex, settings) {
         if (!rows.length) {
@@ -275,7 +252,6 @@
         setView: setView,
         renderOptions: renderOptions,
         renderSpendList: renderSpendList,
-        renderWeeklyBars: renderWeeklyBars,
         renderTableRows: renderTableRows,
         renderPagination: renderPagination,
         clearModalErrors: clearModalErrors

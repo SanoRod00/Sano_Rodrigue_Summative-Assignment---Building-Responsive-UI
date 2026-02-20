@@ -74,8 +74,8 @@ BudgetBuddy employs Regular Expressions extensively for both input validation an
 ### Standard Patterns
 
 **1. Description Validation**
-*   **Pattern:** ^[a-zA-Z0-9\s.,'-]{3,50}$
-*   **Purpose:** Ensures the description contains only alphanumeric characters, spaces, and common punctuation, with a length between 3 and 50 characters.
+*   **Pattern:** ^[a-zA-Z0-9\s.,'-]{3,60}$
+*   **Purpose:** Ensures the description contains only alphanumeric characters, spaces, and common punctuation, with a length between 3 and 60 characters.
 *   **Valid Example:** "Lunch at Cafeteria"
 *   **Invalid Example:** "Hi!" (too short) or "Lunch @ Cafe" (invalid special character)
 

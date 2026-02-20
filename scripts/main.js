@@ -14,6 +14,9 @@
         var refs = UI.getRefs();
         var persisted = Storage.load();
         var state = State.createInitialState(persisted);
+        if (Storage.isAvailable && !Storage.isAvailable()) {
+            UI.setLiveMessage(refs, "Local storage is unavailable. Your data will not be saved.");
+        }
 
         var viewMeta = {
             dashboard: {
@@ -32,11 +35,13 @@
 
         var initialView = document.body && document.body.dataset ? document.body.dataset.initialView : "";
         var hashView = window.location.hash ? window.location.hash.replace("#", "") : "";
+        var preferredView = "";
         if (hashView && viewMeta[hashView]) {
-            state.ui.view = hashView;
+            preferredView = hashView;
         } else if (initialView && viewMeta[initialView]) {
-            state.ui.view = initialView;
+            preferredView = initialView;
         }
+        state.ui.view = resolveView(preferredView || state.ui.view);
         state.ui.modalOpen = false;
 
         var modalDraft = {
@@ -70,6 +75,25 @@
                 renderQueued = false;
                 render();
             });
+        }
+
+        function viewExists(viewName) {
+            if (!refs.views || !refs.views.length) {
+                return false;
+            }
+            return refs.views.some(function (view) {
+                return view.dataset.view === viewName;
+            });
+        }
+
+        function resolveView(viewName) {
+            if (viewExists(viewName)) {
+                return viewName;
+            }
+            if (refs.views && refs.views.length) {
+                return refs.views[0].dataset.view || "dashboard";
+            }
+            return "dashboard";
         }
 
         function getPivotDate() {
@@ -122,29 +146,6 @@
             return totals;
         }
 
-        function getWeeklyTotals(pivotDate) {
-            var dayMap = Object.create(null);
-            for (var i = 0; i < state.transactions.length; i += 1) {
-                var tx = state.transactions[i];
-                dayMap[tx.date] = (dayMap[tx.date] || 0) + tx.amount;
-            }
-
-            var pivot = new Date(pivotDate + "T00:00:00");
-            var out = [];
-
-            for (var d = 6; d >= 0; d -= 1) {
-                var day = new Date(pivot);
-                day.setDate(day.getDate() - d);
-                var iso = day.toISOString().slice(0, 10);
-                out.push({
-                    label: day.toLocaleDateString(undefined, { weekday: "short" }),
-                    amount: dayMap[iso] || 0
-                });
-            }
-
-            return out;
-        }
-
         function getTransactionView() {
             var pivotDate = getPivotDate();
             var filtered = Search.filterTransactions(state.transactions, {
@@ -169,6 +170,9 @@
         }
 
         function renderDashboard(viewData) {
+            if (!refs.dashboardPeriod) {
+                return;
+            }
             var monthRows = getMonthTransactions(viewData.pivotDate);
             var monthSpent = sumAmounts(monthRows);
             var remaining = state.settings.budgetCap - monthSpent;
@@ -179,13 +183,20 @@
                 "This month (" + monthDate.toLocaleDateString(undefined, { month: "short", year: "numeric" }) + ")";
 
             refs.spentValue.textContent = UI.formatMoneyFromRwf(monthSpent, state.settings);
+            if (refs.remainingLabel) {
+                refs.remainingLabel.textContent = remaining >= 0 ? "Remaining" : "Over budget";
+            }
             refs.remainingValue.textContent = UI.formatMoneyFromRwf(Math.abs(remaining), state.settings);
             refs.remainingValue.classList.toggle("danger", remaining < 0);
             refs.remainingValue.classList.toggle("safe", remaining >= 0);
             refs.transactionCountValue.textContent = String(monthRows.length);
 
             refs.budgetProgressFill.style.width = progress.toFixed(1) + "%";
-            refs.progressRemainingText.innerHTML = "<strong>Remaining:</strong> " + UI.formatMoneyFromRwf(remaining, state.settings);
+            refs.progressRemainingText.innerHTML =
+                "<strong>" +
+                (remaining >= 0 ? "Remaining:" : "Over by:") +
+                "</strong> " +
+                UI.formatMoneyFromRwf(Math.abs(remaining), state.settings);
 
             if (remaining >= 0) {
                 refs.progressStatus.textContent = "On track";
@@ -199,36 +210,44 @@
 
             var categoryTotals = getCategoryTotals(monthRows);
             UI.renderSpendList(refs, categoryTotals.slice(0, 6), monthSpent, state.settings);
-            if (refs.weeklyBars) {
-                UI.renderWeeklyBars(refs, getWeeklyTotals(viewData.pivotDate));
-            }
-
             if (categoryTotals.length) {
                 var top = categoryTotals[0];
                 var pct = monthSpent > 0 ? Math.round((top.amount / monthSpent) * 100) : 0;
-                refs.insightTopCategory.innerHTML =
-                    "Highest spend category: <strong>" + Search.escapeHTML(top.category + " (" + pct + "%)") + "</strong>";
+                refs.insightTopCategory.textContent =
+                    "Top category: " + top.category + " (" + pct + "%)";
             } else {
-                refs.insightTopCategory.innerHTML = "Highest spend category: <strong>None</strong>";
+                refs.insightTopCategory.textContent = "Top category: None";
             }
 
             if (state.transactions.length) {
                 var biggest = state.transactions.slice().sort(function (a, b) {
                     return b.amount - a.amount;
                 })[0];
-                refs.insightBiggest.innerHTML =
-                    "Biggest transaction: <strong>" +
-                    Search.escapeHTML(biggest.description + " (" + UI.formatMoneyFromRwf(biggest.amount, state.settings) + ")") +
-                    "</strong>";
+                refs.insightBiggest.textContent =
+                    "Biggest transaction: " +
+                    biggest.description +
+                    " (" +
+                    UI.formatMoneyFromRwf(biggest.amount, state.settings) +
+                    ")";
             } else {
-                refs.insightBiggest.innerHTML = "Biggest transaction: <strong>None</strong>";
+                refs.insightBiggest.textContent = "Biggest transaction: None";
             }
 
             refs.insightSearchCount.textContent =
-                viewData.filteredRows.length + " transactions match your current search.";
+                "Matches for current search: " + viewData.filteredRows.length;
 
+            updateBudgetStatus(remaining);
+        }
+
+        function updateBudgetStatus(remaining) {
+            if (!refs.budgetRemainingLine || !refs.budgetOverLine) {
+                return;
+            }
+            var remainingClamped = Math.max(0, remaining);
             refs.budgetRemainingLine.innerHTML =
-                "Remaining this month: <strong>" + Search.escapeHTML(UI.formatMoneyFromRwf(remaining, state.settings)) + "</strong>";
+                "Remaining this month: <strong>" +
+                Search.escapeHTML(UI.formatMoneyFromRwf(remainingClamped, state.settings)) +
+                "</strong>";
             if (remaining < 0) {
                 refs.budgetOverLine.hidden = false;
                 refs.budgetOverLine.textContent =
@@ -239,15 +258,30 @@
         }
 
         function renderTransactions(viewData) {
+            if (!refs.txSearchInput) {
+                return;
+            }
             refs.txSearchInput.value = state.ui.search;
-            refs.caseSensitiveToggle.checked = state.settings.caseSensitive;
-            refs.settingsCaseSensitive.checked = state.settings.caseSensitive;
-            refs.categoryFilter.value = state.ui.category;
-            refs.dateRangeFilter.value = state.ui.dateRange;
-            refs.sortSelect.value = state.ui.sort;
+            if (refs.caseSensitiveToggle) {
+                refs.caseSensitiveToggle.checked = state.settings.caseSensitive;
+            }
+            if (refs.settingsCaseSensitive) {
+                refs.settingsCaseSensitive.checked = state.settings.caseSensitive;
+            }
+            if (refs.categoryFilter) {
+                refs.categoryFilter.value = state.ui.category;
+            }
+            if (refs.dateRangeFilter) {
+                refs.dateRangeFilter.value = state.ui.dateRange;
+            }
+            if (refs.sortSelect) {
+                refs.sortSelect.value = state.ui.sort;
+            }
 
-            refs.regexError.hidden = !state.ui.regexError;
-            refs.regexError.textContent = state.ui.regexError;
+            if (refs.regexError) {
+                refs.regexError.hidden = !state.ui.regexError;
+                refs.regexError.textContent = state.ui.regexError;
+            }
 
             var page = viewData.page;
             var filteredTotalSpent = sumAmounts(viewData.filteredRows);
@@ -265,20 +299,34 @@
             }
 
             baseLine += " - Total Spent: " + UI.formatMoneyFromRwf(filteredTotalSpent, state.settings);
-            refs.resultsLine.textContent = baseLine;
+            if (refs.resultsLine) {
+                refs.resultsLine.textContent = baseLine;
+            }
 
             UI.renderTableRows(refs, page.pageItems, viewData.regex, state.settings);
             UI.renderPagination(refs, page);
         }
 
         function renderSettings() {
+            if (!refs.budgetCap) {
+                return;
+            }
             refs.budgetCap.value = String(state.settings.budgetCap);
             refs.baseCurrencySelect.value = state.settings.baseCurrency;
             refs.usdRateInput.value = String(state.settings.usdToRwf);
             refs.eurRateInput.value = String(state.settings.eurToRwf);
+
+            var pivotDate = getPivotDate();
+            var monthRows = getMonthTransactions(pivotDate);
+            var monthSpent = sumAmounts(monthRows);
+            var remaining = state.settings.budgetCap - monthSpent;
+            updateBudgetStatus(remaining);
         }
 
         function renderModal() {
+            if (!refs.modal) {
+                return;
+            }
             refs.modal.hidden = !state.ui.modalOpen;
             document.body.classList.toggle("modal-open", state.ui.modalOpen);
             if (!state.ui.modalOpen) {
@@ -288,6 +336,9 @@
             var isEditing = !!state.ui.editingId;
             refs.modalTitle.textContent = isEditing ? "Edit Transaction" : "Add Transaction";
             refs.saveTransactionBtn.textContent = isEditing ? "Save Changes" : "Add Transaction";
+            if (refs.deleteTransactionBtn) {
+                refs.deleteTransactionBtn.hidden = !isEditing;
+            }
 
             refs.editTransactionId.value = modalDraft.id || "";
             refs.descriptionInput.value = modalDraft.description || "";
@@ -329,8 +380,12 @@
         }
 
         function render() {
-            var meta = viewMeta[state.ui.view] || viewMeta.dashboard;
-            UI.setView(refs, state.ui.view, meta);
+            var resolvedView = resolveView(state.ui.view);
+            if (state.ui.view !== resolvedView) {
+                state.ui.view = resolvedView;
+            }
+            var meta = viewMeta[resolvedView] || viewMeta.dashboard;
+            UI.setView(refs, resolvedView, meta);
 
             var viewData = getTransactionView();
             renderDashboard(viewData);
@@ -340,6 +395,9 @@
         }
 
         function openModal(editId) {
+            if (!refs.transactionForm || !refs.modal) {
+                return;
+            }
             UI.clearModalErrors(refs);
             refs.transactionForm.reset();
 
@@ -417,8 +475,16 @@
         }
 
         function populateOptions() {
-            UI.renderOptions(refs.categoryFilter, [{ value: "all", label: "All Categories" }].concat(State.CATEGORIES), state.ui.category);
-            UI.renderOptions(refs.categoryInput, State.CATEGORIES, modalDraft.category);
+            if (refs.categoryFilter) {
+                UI.renderOptions(
+                    refs.categoryFilter,
+                    [{ value: "all", label: "All Categories" }].concat(State.CATEGORIES),
+                    state.ui.category
+                );
+            }
+            if (refs.categoryInput) {
+                UI.renderOptions(refs.categoryInput, State.CATEGORIES, modalDraft.category);
+            }
         }
 
         function bindEvents() {
@@ -435,7 +501,7 @@
 
             window.addEventListener("hashchange", function () {
                 var nextHash = window.location.hash ? window.location.hash.replace("#", "") : "";
-                if (nextHash && viewMeta[nextHash]) {
+                if (nextHash && viewMeta[nextHash] && viewExists(nextHash)) {
                     state.ui.view = nextHash;
                     queueRender();
                 }
@@ -460,11 +526,13 @@
                 });
             });
 
-            refs.modal.addEventListener("click", function (event) {
-                if (event.target === refs.modal) {
-                    requestCloseModal(false);
-                }
-            });
+            if (refs.modal) {
+                refs.modal.addEventListener("click", function (event) {
+                    if (event.target === refs.modal) {
+                        requestCloseModal(false);
+                    }
+                });
+            }
 
             document.addEventListener("keydown", function (event) {
                 if (event.key === "Escape" && state.ui.modalOpen) {
@@ -478,237 +546,304 @@
                 queueRender();
             }, 100);
 
-            refs.txSearchInput.addEventListener("input", function (event) {
-                updateSearch(event.target.value);
-            });
+            if (refs.txSearchInput) {
+                refs.txSearchInput.addEventListener("input", function (event) {
+                    updateSearch(event.target.value);
+                });
+            }
 
-            refs.caseSensitiveToggle.addEventListener("change", function (event) {
-                applySettingsPatch({ caseSensitive: event.target.checked });
-                UI.setLiveMessage(refs, "Search case sensitivity updated.");
-            });
+            if (refs.caseSensitiveToggle) {
+                refs.caseSensitiveToggle.addEventListener("change", function (event) {
+                    applySettingsPatch({ caseSensitive: event.target.checked });
+                    UI.setLiveMessage(refs, "Search case sensitivity updated.");
+                });
+            }
 
-            refs.settingsCaseSensitive.addEventListener("change", function (event) {
-                applySettingsPatch({ caseSensitive: event.target.checked });
-                UI.setLiveMessage(refs, "Search case sensitivity updated.");
-            });
+            if (refs.settingsCaseSensitive) {
+                refs.settingsCaseSensitive.addEventListener("change", function (event) {
+                    applySettingsPatch({ caseSensitive: event.target.checked });
+                    UI.setLiveMessage(refs, "Search case sensitivity updated.");
+                });
+            }
 
-            refs.categoryFilter.addEventListener("change", function (event) {
-                state.ui.category = event.target.value;
-                state.ui.page = 1;
-                queueRender();
-            });
+            if (refs.categoryFilter) {
+                refs.categoryFilter.addEventListener("change", function (event) {
+                    state.ui.category = event.target.value;
+                    state.ui.page = 1;
+                    queueRender();
+                });
+            }
 
-            refs.dateRangeFilter.addEventListener("change", function (event) {
-                state.ui.dateRange = event.target.value;
-                state.ui.page = 1;
-                queueRender();
-            });
+            if (refs.dateRangeFilter) {
+                refs.dateRangeFilter.addEventListener("change", function (event) {
+                    state.ui.dateRange = event.target.value;
+                    state.ui.page = 1;
+                    queueRender();
+                });
+            }
 
-            refs.sortSelect.addEventListener("change", function (event) {
-                state.ui.sort = event.target.value;
-                state.ui.page = 1;
-                queueRender();
-            });
+            if (refs.sortSelect) {
+                refs.sortSelect.addEventListener("change", function (event) {
+                    state.ui.sort = event.target.value;
+                    state.ui.page = 1;
+                    queueRender();
+                });
+            }
 
-            refs.pagination.addEventListener("click", function (event) {
-                var button = event.target.closest("button[data-page]");
-                if (!button || button.disabled) {
-                    return;
-                }
-
-                var nextPage = Number(button.dataset.page);
-                if (!Number.isFinite(nextPage) || nextPage < 1) {
-                    return;
-                }
-
-                state.ui.page = nextPage;
-                queueRender();
-            });
-
-            refs.transactionsTbody.addEventListener("click", function (event) {
-                var editButton = event.target.closest("button[data-edit-id]");
-                if (!editButton) {
-                    return;
-                }
-                openModal(editButton.dataset.editId);
-            });
-
-            refs.budgetCap.addEventListener("change", function () {
-                var value = Number(refs.budgetCap.value);
-                if (!Number.isFinite(value) || value <= 0) {
-                    refs.budgetCap.value = String(state.settings.budgetCap);
-                    return;
-                }
-                applySettingsPatch({ budgetCap: Math.round(value) });
-                UI.setLiveMessage(refs, "Budget cap updated.");
-            });
-
-            refs.baseCurrencySelect.addEventListener("change", function () {
-                applySettingsPatch({ baseCurrency: refs.baseCurrencySelect.value });
-                UI.setLiveMessage(refs, "Base currency updated.");
-            });
-
-            refs.usdRateInput.addEventListener("change", function () {
-                var value = Number(refs.usdRateInput.value);
-                if (!Number.isFinite(value) || value <= 0) {
-                    refs.usdRateInput.value = String(state.settings.usdToRwf);
-                    return;
-                }
-                applySettingsPatch({ usdToRwf: Math.round(value) });
-                UI.setLiveMessage(refs, "USD conversion rate updated.");
-            });
-
-            refs.eurRateInput.addEventListener("change", function () {
-                var value = Number(refs.eurRateInput.value);
-                if (!Number.isFinite(value) || value <= 0) {
-                    refs.eurRateInput.value = String(state.settings.eurToRwf);
-                    return;
-                }
-                applySettingsPatch({ eurToRwf: Math.round(value) });
-                UI.setLiveMessage(refs, "EUR conversion rate updated.");
-            });
-
-            refs.exportBtn.addEventListener("click", function () {
-                Storage.exportJSON(State.serializableState(state));
-                UI.setLiveMessage(refs, "Data exported successfully.");
-            });
-
-            refs.importBtn.addEventListener("click", function () {
-                refs.importFileInput.click();
-            });
-
-            refs.importFileInput.addEventListener("change", function (event) {
-                var file = event.target.files && event.target.files[0];
-                Storage.importJSONFile(file)
-                    .then(function (data) {
-                        state = State.createInitialState(data);
-                        state.ui.view = "transactions";
-                        populateOptions();
-                        persistState();
-                        queueRender();
-                        UI.setLiveMessage(refs, "Data imported successfully.");
-                    })
-                    .catch(function (error) {
-                        UI.setLiveMessage(refs, error.message);
-                    })
-                    .finally(function () {
-                        refs.importFileInput.value = "";
-                    });
-            });
-
-            refs.resetDataBtn.addEventListener("click", function () {
-                if (!window.confirm("Reset all transactions and settings? This cannot be undone.")) {
-                    return;
-                }
-                state = State.createInitialState(null);
-                Storage.clear();
-                persistState();
-                populateOptions();
-                queueRender();
-                UI.setLiveMessage(refs, "All data was reset.");
-            });
-
-            refs.receiptTrigger.addEventListener("click", function () {
-                refs.receiptInput.click();
-            });
-
-            refs.receiptInput.addEventListener("change", function () {
-                var file = refs.receiptInput.files && refs.receiptInput.files[0];
-                modalDraft.receiptName = file ? file.name : "";
-                modalDirty = true;
-                refs.receiptName.textContent = modalDraft.receiptName || "No file selected";
-            });
-
-            refs.transactionForm.addEventListener("input", function () {
-                if (state.ui.modalOpen) {
-                    modalDirty = true;
-                }
-            });
-
-            refs.transactionForm.addEventListener("change", function () {
-                if (state.ui.modalOpen) {
-                    modalDirty = true;
-                }
-            });
-
-            refs.transactionForm.addEventListener("submit", function (event) {
-                event.preventDefault();
-                UI.clearModalErrors(refs);
-
-                var input = {
-                    description: refs.descriptionInput.value,
-                    amount: refs.amountInput.value,
-                    category: refs.categoryInput.value,
-                    date: refs.dateInput.value,
-                    receiptName: modalDraft.receiptName
-                };
-
-                var validation = Validators.validateTransactionInput(input, State.CATEGORIES);
-
-                refs.descriptionHint.textContent = validation.hints.description || "";
-
-                if (!validation.isValid) {
-                    if (validation.errors.description) {
-                        refs.descriptionError.hidden = false;
-                        refs.descriptionError.textContent = validation.errors.description;
+            if (refs.pagination) {
+                refs.pagination.addEventListener("click", function (event) {
+                    var button = event.target.closest("button[data-page]");
+                    if (!button || button.disabled) {
+                        return;
                     }
-                    if (validation.errors.amount) {
-                        refs.amountError.hidden = false;
-                        refs.amountError.textContent = validation.errors.amount;
-                    }
-                    if (validation.errors.category) {
-                        refs.categoryError.hidden = false;
-                        refs.categoryError.textContent = validation.errors.category;
-                    }
-                    if (validation.errors.date) {
-                        refs.dateError.hidden = false;
-                        refs.dateError.textContent = validation.errors.date;
-                    }
-                    return;
-                }
 
-                var now = State.nowIso();
-                if (state.ui.editingId) {
-                    state.transactions = state.transactions.map(function (tx) {
-                        if (tx.id !== state.ui.editingId) {
-                            return tx;
-                        }
-                        return {
-                            id: tx.id,
-                            description: validation.values.description,
-                            amount: validation.values.amount,
-                            category: validation.values.category,
-                            date: validation.values.date,
-                            receiptName: validation.values.receiptName,
-                            createdAt: tx.createdAt,
-                            updatedAt: now
-                        };
-                    });
+                    var nextPage = Number(button.dataset.page);
+                    if (!Number.isFinite(nextPage) || nextPage < 1) {
+                        return;
+                    }
 
-                    UI.setLiveMessage(refs, "Transaction updated.");
-                } else {
-                    state.transactions.unshift(
-                        State.toTransaction({
-                            id: State.createId(),
-                            description: validation.values.description,
-                            amount: validation.values.amount,
-                            category: validation.values.category,
-                            date: validation.values.date,
-                            receiptName: validation.values.receiptName,
-                            createdAt: now,
-                            updatedAt: now
+                    state.ui.page = nextPage;
+                    queueRender();
+                });
+            }
+
+            if (refs.transactionsTbody) {
+                refs.transactionsTbody.addEventListener("click", function (event) {
+                    var editButton = event.target.closest("button[data-edit-id]");
+                    if (!editButton) {
+                        return;
+                    }
+                    openModal(editButton.dataset.editId);
+                });
+            }
+
+            if (refs.budgetCap) {
+                refs.budgetCap.addEventListener("change", function () {
+                    var value = Number(refs.budgetCap.value);
+                    if (!Number.isFinite(value) || value <= 0) {
+                        refs.budgetCap.value = String(state.settings.budgetCap);
+                        return;
+                    }
+                    applySettingsPatch({ budgetCap: Math.round(value) });
+                    UI.setLiveMessage(refs, "Budget cap updated.");
+                });
+            }
+
+            if (refs.baseCurrencySelect) {
+                refs.baseCurrencySelect.addEventListener("change", function () {
+                    applySettingsPatch({ baseCurrency: refs.baseCurrencySelect.value });
+                    UI.setLiveMessage(refs, "Base currency updated.");
+                });
+            }
+
+            if (refs.usdRateInput) {
+                refs.usdRateInput.addEventListener("change", function () {
+                    var value = Number(refs.usdRateInput.value);
+                    if (!Number.isFinite(value) || value <= 0) {
+                        refs.usdRateInput.value = String(state.settings.usdToRwf);
+                        return;
+                    }
+                    applySettingsPatch({ usdToRwf: Math.round(value) });
+                    UI.setLiveMessage(refs, "USD conversion rate updated.");
+                });
+            }
+
+            if (refs.eurRateInput) {
+                refs.eurRateInput.addEventListener("change", function () {
+                    var value = Number(refs.eurRateInput.value);
+                    if (!Number.isFinite(value) || value <= 0) {
+                        refs.eurRateInput.value = String(state.settings.eurToRwf);
+                        return;
+                    }
+                    applySettingsPatch({ eurToRwf: Math.round(value) });
+                    UI.setLiveMessage(refs, "EUR conversion rate updated.");
+                });
+            }
+
+            if (refs.exportBtn) {
+                refs.exportBtn.addEventListener("click", function () {
+                    Storage.exportJSON(State.serializableState(state));
+                    UI.setLiveMessage(refs, "Data exported successfully.");
+                });
+            }
+
+            if (refs.importBtn && refs.importFileInput) {
+                refs.importBtn.addEventListener("click", function () {
+                    refs.importFileInput.click();
+                });
+            }
+
+            if (refs.importFileInput) {
+                refs.importFileInput.addEventListener("change", function (event) {
+                    var file = event.target.files && event.target.files[0];
+                    Storage.importJSONFile(file)
+                        .then(function (data) {
+                            state = State.createInitialState(data);
+                            if (viewExists("transactions")) {
+                                state.ui.view = "transactions";
+                            }
+                            populateOptions();
+                            persistState();
+                            queueRender();
+                            UI.setLiveMessage(refs, "Data imported successfully.");
                         })
-                    );
+                        .catch(function (error) {
+                            UI.setLiveMessage(refs, error.message);
+                        })
+                        .finally(function () {
+                            refs.importFileInput.value = "";
+                        });
+                });
+            }
 
-                    UI.setLiveMessage(refs, "Transaction added.");
-                }
+            if (refs.resetDataBtn) {
+                refs.resetDataBtn.addEventListener("click", function () {
+                    if (!window.confirm("Reset all transactions and settings? This cannot be undone.")) {
+                        return;
+                    }
+                    state = State.createInitialState(null);
+                    Storage.clear();
+                    persistState();
+                    populateOptions();
+                    queueRender();
+                    UI.setLiveMessage(refs, "All data was reset.");
+                });
+            }
 
-                state.ui.view = "transactions";
-                state.ui.page = 1;
+            if (refs.receiptTrigger && refs.receiptInput) {
+                refs.receiptTrigger.addEventListener("click", function () {
+                    refs.receiptInput.click();
+                });
+            }
 
-                persistState();
-                requestCloseModal(true);
-            });
+            if (refs.receiptInput) {
+                refs.receiptInput.addEventListener("change", function () {
+                    var file = refs.receiptInput.files && refs.receiptInput.files[0];
+                    modalDraft.receiptName = file ? file.name : "";
+                    modalDirty = true;
+                    if (refs.receiptName) {
+                        refs.receiptName.textContent = modalDraft.receiptName || "No file selected";
+                    }
+                });
+            }
+
+            if (refs.deleteTransactionBtn) {
+                refs.deleteTransactionBtn.addEventListener("click", function () {
+                    if (!state.ui.editingId) {
+                        return;
+                    }
+                    if (!window.confirm("Delete this transaction? This cannot be undone.")) {
+                        return;
+                    }
+                    var targetId = state.ui.editingId;
+                    state.transactions = state.transactions.filter(function (tx) {
+                        return tx.id !== targetId;
+                    });
+                    state.ui.editingId = "";
+                    if (viewExists("transactions")) {
+                        state.ui.view = "transactions";
+                    }
+                    state.ui.page = 1;
+                    persistState();
+                    UI.setLiveMessage(refs, "Transaction deleted.");
+                    requestCloseModal(true);
+                });
+            }
+
+            if (refs.transactionForm) {
+                refs.transactionForm.addEventListener("input", function () {
+                    if (state.ui.modalOpen) {
+                        modalDirty = true;
+                    }
+                });
+
+                refs.transactionForm.addEventListener("change", function () {
+                    if (state.ui.modalOpen) {
+                        modalDirty = true;
+                    }
+                });
+
+                refs.transactionForm.addEventListener("submit", function (event) {
+                    event.preventDefault();
+                    UI.clearModalErrors(refs);
+
+                    var input = {
+                        description: refs.descriptionInput.value,
+                        amount: refs.amountInput.value,
+                        category: refs.categoryInput.value,
+                        date: refs.dateInput.value,
+                        receiptName: modalDraft.receiptName
+                    };
+
+                    var validation = Validators.validateTransactionInput(input, State.CATEGORIES);
+
+                    refs.descriptionHint.textContent = validation.hints.description || "";
+
+                    if (!validation.isValid) {
+                        if (validation.errors.description) {
+                            refs.descriptionError.hidden = false;
+                            refs.descriptionError.textContent = validation.errors.description;
+                        }
+                        if (validation.errors.amount) {
+                            refs.amountError.hidden = false;
+                            refs.amountError.textContent = validation.errors.amount;
+                        }
+                        if (validation.errors.category) {
+                            refs.categoryError.hidden = false;
+                            refs.categoryError.textContent = validation.errors.category;
+                        }
+                        if (validation.errors.date) {
+                            refs.dateError.hidden = false;
+                            refs.dateError.textContent = validation.errors.date;
+                        }
+                        return;
+                    }
+
+                    var now = State.nowIso();
+                    if (state.ui.editingId) {
+                        state.transactions = state.transactions.map(function (tx) {
+                            if (tx.id !== state.ui.editingId) {
+                                return tx;
+                            }
+                            return {
+                                id: tx.id,
+                                description: validation.values.description,
+                                amount: validation.values.amount,
+                                category: validation.values.category,
+                                date: validation.values.date,
+                                receiptName: validation.values.receiptName,
+                                createdAt: tx.createdAt,
+                                updatedAt: now
+                            };
+                        });
+
+                        UI.setLiveMessage(refs, "Transaction updated.");
+                    } else {
+                        state.transactions.unshift(
+                            State.toTransaction({
+                                id: State.createId(),
+                                description: validation.values.description,
+                                amount: validation.values.amount,
+                                category: validation.values.category,
+                                date: validation.values.date,
+                                receiptName: validation.values.receiptName,
+                                createdAt: now,
+                                updatedAt: now
+                            })
+                        );
+
+                        UI.setLiveMessage(refs, "Transaction added.");
+                    }
+
+                    if (viewExists("transactions")) {
+                        state.ui.view = "transactions";
+                    }
+                    state.ui.page = 1;
+
+                    persistState();
+                    requestCloseModal(true);
+                });
+            }
         }
 
         populateOptions();

@@ -1,7 +1,7 @@
 (function () {
     var APP = window.BudgetBuddy || (window.BudgetBuddy = {});
 
-    var DESCRIPTION_PATTERN = /^[a-zA-Z0-9\s.,'-]{3,50}$/;
+    var DESCRIPTION_PATTERN = /^[a-zA-Z0-9\s.,'-]{3,60}$/;
     var AMOUNT_PATTERN = /^\d+(\.\d{1,2})?$/;
     var DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
     var REPEATED_WORD_PATTERN = /\b(\w+)\s+\1\b/i;
@@ -45,7 +45,7 @@
         if (!description) {
             errors.description = "Description is required.";
         } else if (!DESCRIPTION_PATTERN.test(description)) {
-            errors.description = "Use 3-50 chars: letters, numbers, spaces, and . , ' -";
+            errors.description = "Use 3-60 chars: letters, numbers, spaces, and . , ' -";
         } else if (REPEATED_WORD_PATTERN.test(description)) {
             errors.description = "Avoid repeated words in the description.";
             hints.description = "Looks like you repeated a word.";

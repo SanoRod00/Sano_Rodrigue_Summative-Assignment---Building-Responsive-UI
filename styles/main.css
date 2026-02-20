@@ -42,6 +42,7 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+
 .sr-only {
     position: absolute;
     width: 1px;
@@ -154,7 +155,19 @@ body {
 }
 
 .alu-hero-copy {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    column-gap: 48px;
+    align-items: start;
     padding-right: 8px;
+}
+
+.alu-hero-title {
+    min-width: 0;
+}
+
+.alu-hero-details {
+    min-width: 0;
 }
 
 .alu-eyebrow {
@@ -166,7 +179,7 @@ body {
 }
 
 .alu-hero-copy h1 {
-    margin-top: 0;
+    margin: 0 0 20px;
     font-size: clamp(2.8rem, 5vw, 4.6rem);
     line-height: 1.08;
     letter-spacing: -0.02em;
@@ -176,11 +189,12 @@ body {
 
 .typing-text {
     display: inline;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.35);
+    padding-bottom: 8px;
+    border-bottom: none;
 }
 
 .alu-lead {
-    margin-top: 18px;
+    margin: 0 0 14px;
     font-size: 1.1rem;
     color: rgba(255, 255, 255, 0.92);
     max-width: 58ch;
@@ -188,13 +202,13 @@ body {
 }
 
 .alu-sub {
-    margin-top: 12px;
+    margin: 0 0 20px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.9);
 }
 
 .alu-hero-actions {
-    margin-top: 26px;
+    margin: 0 0 8px;
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
@@ -441,6 +455,15 @@ input:focus-visible {
     background: linear-gradient(135deg, var(--navy-dark), #1d4a80);
 }
 
+.btn-danger {
+    background: #b4233a;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: #9b1b23;
+}
+
 .btn-full {
     width: 100%;
 }
@@ -581,30 +604,6 @@ input:focus-visible {
     letter-spacing: -0.025em;
 }
 
-.view-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.chip {
-    border: 1px solid #cad4e8;
-    background: #fff;
-    color: #1a2d4e;
-    border-radius: 999px;
-    padding: 9px 16px;
-    font: inherit;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background-color var(--dur) ease, color var(--dur) ease, border-color var(--dur) ease;
-}
-
-.chip.active,
-.chip:hover {
-    background: var(--navy);
-    border-color: var(--navy);
-    color: #fff;
-}
 
 .app-window {
     border-radius: 0;
@@ -853,6 +852,7 @@ input:focus-visible {
     gap: 10px;
 }
 
+
 .spend-panel li {
     display: grid;
     grid-template-columns: 112px 1fr auto;
@@ -908,69 +908,15 @@ input:focus-visible {
     border: 1px solid #d7e1f3;
 }
 
-.insights-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 12px;
+.insights-panel h4 {
+    margin-bottom: 10px;
 }
 
-.insights-header p {
-    margin-top: 4px;
-    font-size: 0.92rem;
-    color: #52648f;
-}
-
-.insights-badge {
-    background: #e3efff;
-    color: #2453a3;
-    font-weight: 800;
-    font-size: 0.72rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 6px 10px;
-    border-radius: 999px;
-}
-
-.insights-list {
-    margin-top: 6px;
+.insights-simple {
     display: grid;
-    gap: 12px;
-    list-style: none;
-}
-
-.insights-list li {
-    font-size: 0.95rem;
-    line-height: 1.45;
+    gap: 8px;
     color: #22355d;
-    background: #f3f6ff;
-    border: 1px solid #d9e4f6;
-    padding: 12px 14px 12px 40px;
-    border-radius: 12px;
-    position: relative;
-}
-
-.insights-list li::before {
-    content: "";
-    position: absolute;
-    left: 14px;
-    top: 14px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #ff4b55, #d71920);
-    box-shadow: 0 0 0 4px rgba(215, 25, 32, 0.15);
-}
-
-.insights-list li:nth-child(2)::before {
-    background: linear-gradient(135deg, #4aa3ff, #2b6bdc);
-    box-shadow: 0 0 0 4px rgba(43, 107, 220, 0.15);
-}
-
-.insights-list li:nth-child(3)::before {
-    background: linear-gradient(135deg, #3ccf91, #169d6d);
-    box-shadow: 0 0 0 4px rgba(22, 157, 109, 0.15);
+    font-size: 0.96rem;
 }
 
 .transactions-toolbar {
@@ -1415,6 +1361,11 @@ body.modal-open {
         padding-top: 64px;
     }
 
+    .alu-hero-copy {
+        grid-template-columns: 1fr;
+        row-gap: 22px;
+    }
+
     .workspace {
         padding: 16px;
     }
@@ -1517,13 +1468,6 @@ body.modal-open {
         align-items: flex-start;
     }
 
-    .view-chips {
-        width: 100%;
-    }
-
-    .chip {
-        flex: 1 1 30%;
-    }
 
     .dashboard-top-actions {
         flex-direction: column;

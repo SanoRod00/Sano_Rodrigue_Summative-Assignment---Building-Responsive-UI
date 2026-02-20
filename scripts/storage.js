@@ -1,6 +1,17 @@
 (function () {
     var APP = window.BudgetBuddy || (window.BudgetBuddy = {});
-    var STORAGE_KEY = "budgetbuddy.v3";
+    var STORAGE_KEY = "budgetbuddy.v4";
+    var TEST_KEY = STORAGE_KEY + ".test";
+
+    function isAvailable() {
+        try {
+            window.localStorage.setItem(TEST_KEY, "1");
+            window.localStorage.removeItem(TEST_KEY);
+            return true;
+        } catch (_err) {
+            return false;
+        }
+    }
 
     function parseJSON(text) {
         try {
@@ -12,6 +23,9 @@
 
     function load() {
         try {
+            if (!isAvailable()) {
+                return null;
+            }
             var raw = window.localStorage.getItem(STORAGE_KEY);
             if (!raw) {
                 return null;
@@ -24,6 +38,9 @@
 
     function save(stateLike) {
         try {
+            if (!isAvailable()) {
+                return false;
+            }
             window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stateLike));
             return true;
         } catch (_err) {
@@ -33,6 +50,9 @@
 
     function clear() {
         try {
+            if (!isAvailable()) {
+                return false;
+            }
             window.localStorage.removeItem(STORAGE_KEY);
             return true;
         } catch (_err) {
@@ -87,6 +107,7 @@
 
     APP.Storage = {
         STORAGE_KEY: STORAGE_KEY,
+        isAvailable: isAvailable,
         load: load,
         save: save,
         clear: clear,

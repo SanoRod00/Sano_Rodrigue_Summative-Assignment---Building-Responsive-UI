@@ -57,20 +57,7 @@
         };
     }
 
-    var DEFAULT_TRANSACTIONS = [
-        toTransaction({ description: "Coffee Shop", amount: 4500, category: "Food & Drink", date: "2026-02-18" }),
-        toTransaction({ description: "Gas Station", amount: 25000, category: "Transport", date: "2026-02-16" }),
-        toTransaction({ description: "New Textbook", amount: 18000, category: "Books", date: "2026-02-14" }),
-        toTransaction({ description: "Monthly Internet Bill", amount: 15000, category: "Food & Drink", date: "2026-02-12" }),
-        toTransaction({ description: "Coffee lunch meetup", amount: 32500, category: "Transport", date: "2026-02-10" }),
-        toTransaction({ description: "Restaurant Lunch", amount: 8500, category: "Food & Drink", date: "2026-02-08" }),
-        toTransaction({ description: "Data Bundle", amount: 7000, category: "Data/Airtime", date: "2026-02-06" }),
-        toTransaction({ description: "Semester Fees", amount: 7000, category: "Fees", date: "2026-02-04" }),
-        toTransaction({ description: "Notebook Refill", amount: 12000, category: "Academic", date: "2026-01-29" }),
-        toTransaction({ description: "Campus Laundry", amount: 9800, category: "Personal", date: "2026-01-21" }),
-        toTransaction({ description: "Clinic Visit", amount: 5400, category: "Health", date: "2026-01-17" }),
-        toTransaction({ description: "Utility Top Up", amount: 22000, category: "Utilities", date: "2026-01-12" })
-    ];
+    var DEFAULT_TRANSACTIONS = [];
 
     function clone(value) {
         return JSON.parse(JSON.stringify(value));
@@ -92,7 +79,7 @@
 
     function sanitizeTransactions(list) {
         if (!Array.isArray(list)) {
-            return clone(DEFAULT_TRANSACTIONS);
+            return [];
         }
 
         var out = [];
@@ -103,7 +90,7 @@
             }
         }
 
-        return out.length ? out : clone(DEFAULT_TRANSACTIONS);
+        return out;
     }
 
     function createInitialState(saved) {
