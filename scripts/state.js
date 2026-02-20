@@ -57,8 +57,6 @@
         };
     }
 
-    var DEFAULT_TRANSACTIONS = [];
-
     function clone(value) {
         return JSON.parse(JSON.stringify(value));
     }
@@ -113,7 +111,6 @@
         CATEGORIES: CATEGORIES,
         DEFAULT_SETTINGS: DEFAULT_SETTINGS,
         DEFAULT_UI: DEFAULT_UI,
-        DEFAULT_TRANSACTIONS: DEFAULT_TRANSACTIONS,
         createInitialState: createInitialState,
         createId: createId,
         nowIso: nowIso,

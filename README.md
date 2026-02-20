@@ -125,7 +125,6 @@ The dashboard provides real-time aggregation of financial data:
 *   **Total Expenses:** Calculates the sum of 'amount' fields across all records.
 *   **Budget Status:** Compares the Total Expenses against the user-defined Monthly Budget Cap. It calculates the remaining balance and updates visual indicators (green for safe, red for warning/over-budget).
 *   **Top Category:** Analyzes transaction frequencies to determine and display the category where the student spends the most.
-*   **Last 7 Days Trend:** Computes the total spending specifically for transactions dated within the last week, offering a view of immediate short-term spending.
 
 ## 7. Accessibility (a11y) Notes
 

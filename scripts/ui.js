@@ -6,7 +6,6 @@
     function getRefs() {
         return {
             live: document.getElementById("appLive"),
-            goTopBtn: document.getElementById("goTopBtn"),
             viewButtons: Array.prototype.slice.call(document.querySelectorAll("[data-view-target]")),
             views: Array.prototype.slice.call(document.querySelectorAll(".workspace-view")),
             workspaceTitle: document.getElementById("workspace-title"),
